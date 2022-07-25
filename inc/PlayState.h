@@ -4,12 +4,10 @@
 #include "State.h"
 #include "FiniteStateMachine.h"
 #include "Window.h"
+#include "Shader.h"
 #include "Camera3.h"
-#include "Texture.h"
 #include "AnimatedMesh.h"
-#include "SkeletonViewer.h"
-#include "Clip.h"
-#include "TrackVisualizer.h"
+#include "Texture.h"
 
 class PlayState : public State
 {
@@ -35,7 +33,6 @@ public:
 
 private:
 
-   void loadCharacters();
    void loadGround();
 
    void configureLights(const std::shared_ptr<Shader>& shader);
@@ -55,46 +52,6 @@ private:
    std::vector<AnimatedMesh>              mGroundMeshes;
    std::shared_ptr<Texture>               mGroundTexture;
    std::shared_ptr<Shader>                mGroundShader;
-
-   std::shared_ptr<Shader>                mAnimatedMeshShader;
-   std::vector<std::shared_ptr<Texture>>  mCharacterTextures;
-   std::vector<Skeleton>                  mCharacterBaseSkeletons;
-   Skeleton                               mCharacterSkeleton;
-   std::vector<std::vector<AnimatedMesh>> mCharacterMeshes;
-   std::vector<std::vector<FastClip>>     mCharacterClips;
-   std::string                            mCharacterNames;
-   std::vector<std::string>               mCharacterClipNames;
-
-   unsigned int                           mCurrentCharacterIndex;
-   std::vector<unsigned int>              mCurrentClipIndex;
-   float                                  mPlaybackTime;
-   Pose                                   mPose;
-   std::vector<glm::mat4>                 mPosePalette;
-   std::vector<glm::mat4>                 mSkinMatrices;
-   std::vector<Transform>                 mModelTransform;
-   std::vector<float>                     mJointScaleFactors;
-
-   int                                    mSelectedCharacter;
-   int                                    mSelectedClip;
-   float                                  mSelectedPlaybackSpeed;
-   bool                                   mDisplayGround;
-   bool                                   mDisplayGraphs;
-   bool                                   mDisplayMesh;
-   bool                                   mDisplayBones;
-   bool                                   mDisplayJoints;
-#ifndef __EMSCRIPTEN__
-   bool                                   mWireframeModeForCharacter;
-   bool                                   mWireframeModeForJoints;
-   bool                                   mPerformDepthTesting;
-#endif
-   bool                                   mFillEmptyTilesWithRepeatedGraphs;
-
-#ifndef __EMSCRIPTEN__
-   bool                                   mPause = false;
-#endif
-
-   SkeletonViewer                         mSkeletonViewer;
-   TrackVisualizer                        mTrackVisualizer;
 };
 
 #endif

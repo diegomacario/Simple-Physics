@@ -10,14 +10,14 @@
 AnimatedMesh::AnimatedMesh()
 {
    glGenVertexArrays(1, &mVAO);
-   glGenBuffers(5, &mVBOs[0]);
+   glGenBuffers(3, &mVBOs[0]);
    glGenBuffers(1, &mEBO);
 }
 
 AnimatedMesh::~AnimatedMesh()
 {
    glDeleteVertexArrays(1, &mVAO);
-   glDeleteBuffers(5, &mVBOs[0]);
+   glDeleteBuffers(3, &mVBOs[0]);
    glDeleteBuffers(1, &mEBO);
 }
 
@@ -25,13 +25,11 @@ AnimatedMesh::AnimatedMesh(AnimatedMesh&& rhs) noexcept
    : mPositions(std::move(rhs.mPositions))
    , mNormals(std::move(rhs.mNormals))
    , mTexCoords(std::move(rhs.mTexCoords))
-   , mWeights(std::move(rhs.mWeights))
-   , mInfluences(std::move(rhs.mInfluences))
    , mIndices(std::move(rhs.mIndices))
    , mNumVertices(std::exchange(rhs.mNumVertices, 0))
    , mNumIndices(std::exchange(rhs.mNumIndices, 0))
    , mVAO(std::exchange(rhs.mVAO, 0))
-   , mVBOs(std::exchange(rhs.mVBOs, std::array<unsigned int, 5>()))
+   , mVBOs(std::exchange(rhs.mVBOs, std::array<unsigned int, 3>()))
    , mEBO(std::exchange(rhs.mEBO, 0))
 {
 
@@ -42,13 +40,11 @@ AnimatedMesh& AnimatedMesh::operator=(AnimatedMesh&& rhs) noexcept
    mPositions   = std::move(rhs.mPositions);
    mNormals     = std::move(rhs.mNormals);
    mTexCoords   = std::move(rhs.mTexCoords);
-   mWeights     = std::move(rhs.mWeights);
-   mInfluences  = std::move(rhs.mInfluences);
    mIndices     = std::move(rhs.mIndices);
    mNumVertices = std::exchange(rhs.mNumVertices, 0);
    mNumIndices  = std::exchange(rhs.mNumIndices, 0);
    mVAO         = std::exchange(rhs.mVAO, 0);
-   mVBOs        = std::exchange(rhs.mVBOs, std::array<unsigned int, 5>());
+   mVBOs        = std::exchange(rhs.mVBOs, std::array<unsigned int, 3>());
    mEBO         = std::exchange(rhs.mEBO, 0);
    return *this;
 }
@@ -69,19 +65,6 @@ void AnimatedMesh::LoadBuffers()
    // Texture coordinates
    glBindBuffer(GL_ARRAY_BUFFER, mVBOs[VBOTypes::texCoords]);
    glBufferData(GL_ARRAY_BUFFER, mTexCoords.size() * sizeof(glm::vec2), &mTexCoords[0], GL_STATIC_DRAW);
-   // TODO: The checks below are necessary because this class currently represents animated and static meshes. It must be split
-   // Weights
-   if (mWeights.size() != 0)
-   {
-      glBindBuffer(GL_ARRAY_BUFFER, mVBOs[VBOTypes::weights]);
-      glBufferData(GL_ARRAY_BUFFER, mWeights.size() * sizeof(glm::vec4), &mWeights[0], GL_STATIC_DRAW);
-   }
-   // Influences
-   if (mInfluences.size() != 0)
-   {
-      glBindBuffer(GL_ARRAY_BUFFER, mVBOs[VBOTypes::influences]);
-      glBufferData(GL_ARRAY_BUFFER, mInfluences.size() * sizeof(glm::ivec4), &mInfluences[0], GL_STATIC_DRAW);
-   }
 
    glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -103,16 +86,12 @@ void AnimatedMesh::ClearMeshData()
    mPositions.clear();
    mNormals.clear();
    mTexCoords.clear();
-   mWeights.clear();
-   mInfluences.clear();
    mIndices.clear();
 }
 
 void AnimatedMesh::ConfigureVAO(int posAttribLocation,
                                 int normalAttribLocation,
-                                int texCoordsAttribLocation,
-                                int weightsAttribLocation,
-                                int influencesAttribLocation)
+                                int texCoordsAttribLocation)
 {
    glBindVertexArray(mVAO);
 
@@ -120,17 +99,13 @@ void AnimatedMesh::ConfigureVAO(int posAttribLocation,
    BindFloatAttribute(posAttribLocation,       mVBOs[VBOTypes::positions], 3);
    BindFloatAttribute(normalAttribLocation,    mVBOs[VBOTypes::normals], 3);
    BindFloatAttribute(texCoordsAttribLocation, mVBOs[VBOTypes::texCoords], 2);
-   BindFloatAttribute(weightsAttribLocation,   mVBOs[VBOTypes::weights], 4);
-   BindIntAttribute(influencesAttribLocation,  mVBOs[VBOTypes::influences], 4);
 
    glBindVertexArray(0);
 }
 
 void AnimatedMesh::UnconfigureVAO(int posAttribLocation,
                                   int normalAttribLocation,
-                                  int texCoordsAttribLocation,
-                                  int weightsAttribLocation,
-                                  int influencesAttribLocation)
+                                  int texCoordsAttribLocation)
 {
    glBindVertexArray(mVAO);
 
@@ -138,8 +113,6 @@ void AnimatedMesh::UnconfigureVAO(int posAttribLocation,
    UnbindAttribute(posAttribLocation,        mVBOs[VBOTypes::positions]);
    UnbindAttribute(normalAttribLocation,     mVBOs[VBOTypes::normals]);
    UnbindAttribute(texCoordsAttribLocation,  mVBOs[VBOTypes::texCoords]);
-   UnbindAttribute(weightsAttribLocation,    mVBOs[VBOTypes::weights]);
-   UnbindAttribute(influencesAttribLocation, mVBOs[VBOTypes::influences]);
 
    glBindVertexArray(0);
 }

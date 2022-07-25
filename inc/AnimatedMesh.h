@@ -1,10 +1,10 @@
 #ifndef ANIMATED_MESH_H
 #define ANIMATED_MESH_H
 
-#include <array>
+#include <glm/glm.hpp>
 
-#include "Skeleton.h"
-#include "Pose.h"
+#include <vector>
+#include <array>
 
 class AnimatedMesh
 {
@@ -22,8 +22,6 @@ public:
    std::vector<glm::vec3>&    GetPositions()  { return mPositions;  }
    std::vector<glm::vec3>&    GetNormals()    { return mNormals;    }
    std::vector<glm::vec2>&    GetTexCoords()  { return mTexCoords;  }
-   std::vector<glm::vec4>&    GetWeights()    { return mWeights;    }
-   std::vector<glm::ivec4>&   GetInfluences() { return mInfluences; }
    std::vector<unsigned int>& GetIndices()    { return mIndices;    }
 
    void                       LoadBuffers();
@@ -31,15 +29,11 @@ public:
 
    void                       ConfigureVAO(int posAttribLocation,
                                            int normalAttribLocation,
-                                           int texCoordsAttribLocation,
-                                           int weightsAttribLocation,
-                                           int influencesAttribLocation);
+                                           int texCoordsAttribLocation);
 
    void                       UnconfigureVAO(int posAttribLocation,
                                              int normalAttribLocation,
-                                             int texCoordsAttribLocation,
-                                             int weightsAttribLocation,
-                                             int influencesAttribLocation);
+                                             int texCoordsAttribLocation);
 
    void                       BindFloatAttribute(int attribLocation, unsigned int VBO, int numComponents);
    void                       BindIntAttribute(int attribLocation, unsigned int VBO, int numComponents);
@@ -53,23 +47,19 @@ private:
    std::vector<glm::vec3>      mPositions;
    std::vector<glm::vec3>      mNormals;
    std::vector<glm::vec2>      mTexCoords;
-   std::vector<glm::vec4>      mWeights;
-   std::vector<glm::ivec4>     mInfluences;
    std::vector<unsigned int>   mIndices;
 
    enum VBOTypes : unsigned int
    {
       positions  = 0,
       normals    = 1,
-      texCoords  = 2,
-      weights    = 3,
-      influences = 4
+      texCoords  = 2
    };
 
    unsigned int                mNumVertices;
    unsigned int                mNumIndices;
    unsigned int                mVAO;
-   std::array<unsigned int, 5> mVBOs;
+   std::array<unsigned int, 3> mVBOs;
    unsigned int                mEBO;
 };
 
