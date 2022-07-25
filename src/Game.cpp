@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "ModelViewerState.h"
+#include "PlayState.h"
 #include "game.h"
 
 Game::Game()
@@ -32,11 +32,11 @@ bool Game::initialize(const std::string& title)
    // Initialize the states
    std::unordered_map<std::string, std::shared_ptr<State>> mStates;
 
-   mStates["viewer"] = std::make_shared<ModelViewerState>(mFSM,
-                                                          mWindow);
+   mStates["play"] = std::make_shared<PlayState>(mFSM,
+                                                 mWindow);
 
    // Initialize the FSM
-   mFSM->initialize(std::move(mStates), "viewer");
+   mFSM->initialize(std::move(mStates), "play");
 
    return true;
 }

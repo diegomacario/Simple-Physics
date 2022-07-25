@@ -1,5 +1,5 @@
-#ifndef MODEL_VIEWER_STATE_H
-#define MODEL_VIEWER_STATE_H
+#ifndef PLAY_STATE_H
+#define PLAY_STATE_H
 
 #include "State.h"
 #include "FiniteStateMachine.h"
@@ -11,19 +11,19 @@
 #include "Clip.h"
 #include "TrackVisualizer.h"
 
-class ModelViewerState : public State
+class PlayState : public State
 {
 public:
 
-   ModelViewerState(const std::shared_ptr<FiniteStateMachine>& finiteStateMachine,
-                    const std::shared_ptr<Window>&             window);
-   ~ModelViewerState() = default;
+   PlayState(const std::shared_ptr<FiniteStateMachine>& finiteStateMachine,
+             const std::shared_ptr<Window>&             window);
+   ~PlayState() = default;
 
-   ModelViewerState(const ModelViewerState&) = delete;
-   ModelViewerState& operator=(const ModelViewerState&) = delete;
+   PlayState(const PlayState&) = delete;
+   PlayState& operator=(const PlayState&) = delete;
 
-   ModelViewerState(ModelViewerState&&) = delete;
-   ModelViewerState& operator=(ModelViewerState&&) = delete;
+   PlayState(PlayState&&) = delete;
+   PlayState& operator=(PlayState&&) = delete;
 
    void initializeState();
 

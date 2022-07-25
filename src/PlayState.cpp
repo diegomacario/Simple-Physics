@@ -11,10 +11,10 @@
 #include "TextureLoader.h"
 #include "GLTFLoader.h"
 #include "RearrangeBones.h"
-#include "ModelViewerState.h"
+#include "PlayState.h"
 
-ModelViewerState::ModelViewerState(const std::shared_ptr<FiniteStateMachine>& finiteStateMachine,
-                                   const std::shared_ptr<Window>&             window)
+PlayState::PlayState(const std::shared_ptr<FiniteStateMachine>& finiteStateMachine,
+                     const std::shared_ptr<Window>&             window)
    : mFSM(finiteStateMachine)
    , mWindow(window)
    , mCamera3(7.5f, 25.0f, glm::vec3(0.0f), Q::quat(), glm::vec3(0.0f, 2.5f, 0.0f), 2.0f, 20.0f, 0.0f, 90.0f, 45.0f, 1280.0f / 720.0f, 0.1f, 130.0f, 0.25f)
@@ -33,7 +33,7 @@ ModelViewerState::ModelViewerState(const std::shared_ptr<FiniteStateMachine>& fi
    loadGround();
 }
 
-void ModelViewerState::initializeState()
+void PlayState::initializeState()
 {
 #ifndef __EMSCRIPTEN__
    mPause = false;
@@ -121,14 +121,14 @@ void ModelViewerState::initializeState()
    mTrackVisualizer.setTracks(mCharacterClips[mCurrentCharacterIndex][mCurrentClipIndex[mCurrentCharacterIndex]].GetTransformTracks());
 }
 
-void ModelViewerState::enter()
+void PlayState::enter()
 {
    initializeState();
    resetCamera();
    resetScene();
 }
 
-void ModelViewerState::processInput()
+void PlayState::processInput()
 {
    // Close the game
    if (mWindow->keyIsPressed(GLFW_KEY_ESCAPE)) { mWindow->setShouldClose(true); }
@@ -190,7 +190,7 @@ void ModelViewerState::processInput()
 #endif
 }
 
-void ModelViewerState::update(float deltaTime)
+void PlayState::update(float deltaTime)
 {
 #ifndef __EMSCRIPTEN__
    if (mPause)
@@ -254,7 +254,7 @@ void ModelViewerState::update(float deltaTime)
    mTrackVisualizer.update(deltaTime, mSelectedPlaybackSpeed, mWindow, mFillEmptyTilesWithRepeatedGraphs, mDisplayGraphs);
 }
 
-void ModelViewerState::render()
+void PlayState::render()
 {
    ImGui_ImplOpenGL3_NewFrame();
    ImGui_ImplGlfw_NewFrame();
@@ -385,12 +385,12 @@ void ModelViewerState::render()
    mWindow->pollEvents();
 }
 
-void ModelViewerState::exit()
+void PlayState::exit()
 {
 
 }
 
-void ModelViewerState::loadCharacters()
+void PlayState::loadCharacters()
 {
    std::vector<std::string> characterTextureFilePaths { "resources/models/woman/woman.png",
                                                         "resources/models/man/man.png",
@@ -499,7 +499,7 @@ void ModelViewerState::loadCharacters()
    }
 }
 
-void ModelViewerState::loadGround()
+void PlayState::loadGround()
 {
    // Load the texture of the ground
    mGroundTexture = ResourceManager<Texture>().loadUnmanagedResource<TextureLoader>("resources/models/table/wooden_floor.jpg");
@@ -525,7 +525,7 @@ void ModelViewerState::loadGround()
    }
 }
 
-void ModelViewerState::configureLights(const std::shared_ptr<Shader>& shader)
+void PlayState::configureLights(const std::shared_ptr<Shader>& shader)
 {
    shader->use(true);
    shader->setUniformVec3("pointLights[0].worldPos", glm::vec3(0.0f, 2.0f, 10.0f));
@@ -544,16 +544,16 @@ void ModelViewerState::configureLights(const std::shared_ptr<Shader>& shader)
 
 #ifdef __EMSCRIPTEN__
 EM_JS(void, openReadme, (), {
-   window.open("https://github.com/diegomacario/Animation-Magic/blob/main/README.md");
+   window.open("https://github.com/diegomacario/Simple-Physics/blob/main/README.md");
 });
 #endif
 
-void ModelViewerState::userInterface()
+void PlayState::userInterface()
 {
    ImGui::SetNextWindowPos(ImVec2(10.0f, 10.0f), ImGuiCond_Appearing);
 
    char title[64];
-   snprintf(title, 32, "Animation Magic (%.1f FPS)###AnimationMagic", ImGui::GetIO().Framerate);
+   snprintf(title, 32, "Simple Physics (%.1f FPS)###SimplePhysics", ImGui::GetIO().Framerate);
    ImGui::Begin(title, nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize);
 
 #ifdef __EMSCRIPTEN__
@@ -619,12 +619,12 @@ void ModelViewerState::userInterface()
    ImGui::End();
 }
 
-void ModelViewerState::resetScene()
+void PlayState::resetScene()
 {
 
 }
 
-void ModelViewerState::resetCamera()
+void PlayState::resetCamera()
 {
    mCamera3.reposition(7.5f, 25.0f, glm::vec3(0.0f), Q::quat(), glm::vec3(0.0f, 2.5f, 0.0f), 2.0f, 20.0f, 0.0f, 90.0f);
    mCamera3.processMouseMovement(180.0f / 0.25f, 0.0f);

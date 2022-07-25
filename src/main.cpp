@@ -26,7 +26,7 @@ int main()
    Game game;
 #endif
 
-   if (!game.initialize("Animation Magic"))
+   if (!game.initialize("Simple Physics"))
    {
       std::cout << "Error - main - Failed to initialize the game" << "\n";
       return -1;
