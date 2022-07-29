@@ -8,6 +8,7 @@
 #include "Camera3.h"
 #include "AnimatedMesh.h"
 #include "Texture.h"
+#include "World.h"
 
 class PlayState : public State
 {
@@ -41,6 +42,8 @@ private:
 
    void resetCamera();
 
+   void renderRigidBodies();
+
    std::shared_ptr<FiniteStateMachine>    mFSM;
 
    std::shared_ptr<Window>                mWindow;
@@ -50,6 +53,8 @@ private:
    std::shared_ptr<Shader>                mDiffuseShader;
    std::vector<AnimatedMesh>              mCubeMeshes;
    std::shared_ptr<Texture>               mCubeTexture;
+
+   World                                  mWorld;
 };
 
 #endif

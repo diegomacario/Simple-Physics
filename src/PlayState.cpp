@@ -113,22 +113,7 @@ void PlayState::render()
    glEnable(GL_DEPTH_TEST);
    glClear(GL_DEPTH_BUFFER_BIT);
 
-   mDiffuseShader->use(true);
-   glm::mat4 modelMatrix(1.0f);
-   mDiffuseShader->setUniformMat4("model",      modelMatrix);
-   mDiffuseShader->setUniformMat4("view",       mCamera3.getViewMatrix());
-   mDiffuseShader->setUniformMat4("projection", mCamera3.getPerspectiveProjectionMatrix());
-   mCubeTexture->bind(0, mDiffuseShader->getUniformLocation("diffuseTex"));
-   // Loop over the cube meshes and render each one
-   for (unsigned int i = 0,
-        size = static_cast<unsigned int>(mCubeMeshes.size());
-        i < size;
-        ++i)
-   {
-      mCubeMeshes[i].Render();
-   }
-   mCubeTexture->unbind(0);
-   mDiffuseShader->use(false);
+   renderRigidBodies();
 
    ImGui::Render();
    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -205,4 +190,31 @@ void PlayState::resetCamera()
 {
    mCamera3.reposition(7.5f, 25.0f, glm::vec3(0.0f), Q::quat(), glm::vec3(0.0f, 0.0f, 0.0f), 2.0f, 20.0f, -90.0f, 90.0f);
    mCamera3.processMouseMovement(180.0f / 0.25f, 0.0f);
+}
+
+void PlayState::renderRigidBodies()
+{
+   mDiffuseShader->use(true);
+   mDiffuseShader->setUniformMat4("view",       mCamera3.getViewMatrix());
+   mDiffuseShader->setUniformMat4("projection", mCamera3.getPerspectiveProjectionMatrix());
+   mCubeTexture->bind(0, mDiffuseShader->getUniformLocation("diffuseTex"));
+
+   // Loop over the rigid bodies and render each one
+   const std::vector<RigidBody>& rigidBodies = mWorld.getRigidBodies();
+   for (const RigidBody& rigidBody : rigidBodies)
+   {
+      mDiffuseShader->setUniformMat4("model", rigidBody.getModelMatrix(current));
+
+      // Loop over the cube meshes and render each one
+      for (unsigned int i = 0,
+           size = static_cast<unsigned int>(mCubeMeshes.size());
+           i < size;
+           ++i)
+      {
+         mCubeMeshes[i].Render();
+      }
+   }
+
+   mCubeTexture->unbind(0);
+   mDiffuseShader->use(false);
 }

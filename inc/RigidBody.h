@@ -24,6 +24,7 @@ public:
              glm::mat3 orientation,
              glm::vec3 velocityOfCM,
              glm::vec3 angularMomentum);
+   ~RigidBody() = default;
 
    void      calculateWorldSpaceVertices(RigidBodyState state);
    glm::mat4 getModelMatrix(RigidBodyState state) const;
