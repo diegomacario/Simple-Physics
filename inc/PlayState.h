@@ -33,9 +33,7 @@ public:
 
 private:
 
-   void loadGround();
-
-   void configureLights(const std::shared_ptr<Shader>& shader);
+   void loadModels();
 
    void userInterface();
 
@@ -49,9 +47,9 @@ private:
 
    Camera3                                mCamera3;
 
-   std::vector<AnimatedMesh>              mGroundMeshes;
-   std::shared_ptr<Texture>               mGroundTexture;
-   std::shared_ptr<Shader>                mGroundShader;
+   std::shared_ptr<Shader>                mDiffuseShader;
+   std::vector<AnimatedMesh>              mCubeMeshes;
+   std::shared_ptr<Texture>               mCubeTexture;
 };
 
 #endif

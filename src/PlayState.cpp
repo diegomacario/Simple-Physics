@@ -18,12 +18,11 @@ PlayState::PlayState(const std::shared_ptr<FiniteStateMachine>& finiteStateMachi
    , mWindow(window)
    , mCamera3(7.5f, 25.0f, glm::vec3(0.0f), Q::quat(), glm::vec3(0.0f, 0.0f, 0.0f), 2.0f, 20.0f, 0.0f, 90.0f, 45.0f, 1280.0f / 720.0f, 0.1f, 130.0f, 0.25f)
 {
-   // Initialize the ground shader
-   mGroundShader = ResourceManager<Shader>().loadUnmanagedResource<ShaderLoader>("resources/shaders/static_mesh.vert",
-                                                                                 "resources/shaders/ambient_diffuse_illumination.frag");
-   configureLights(mGroundShader);
+   // Initialize the diffuse shader
+   mDiffuseShader = ResourceManager<Shader>().loadUnmanagedResource<ShaderLoader>("resources/shaders/diffuse.vert",
+                                                                                  "resources/shaders/diffuse.frag");
 
-   loadGround();
+   loadModels();
 }
 
 void PlayState::initializeState()
@@ -114,26 +113,22 @@ void PlayState::render()
    glEnable(GL_DEPTH_TEST);
    glClear(GL_DEPTH_BUFFER_BIT);
 
-   mGroundShader->use(true);
-
+   mDiffuseShader->use(true);
    glm::mat4 modelMatrix(1.0f);
-   modelMatrix = glm::scale(modelMatrix, glm::vec3(0.10f));
-   mGroundShader->setUniformMat4("model",      modelMatrix);
-   mGroundShader->setUniformMat4("view",       mCamera3.getViewMatrix());
-   mGroundShader->setUniformMat4("projection", mCamera3.getPerspectiveProjectionMatrix());
-   mGroundTexture->bind(0, mGroundShader->getUniformLocation("diffuseTex"));
-
-      // Loop over the ground meshes and render each one
+   mDiffuseShader->setUniformMat4("model",      modelMatrix);
+   mDiffuseShader->setUniformMat4("view",       mCamera3.getViewMatrix());
+   mDiffuseShader->setUniformMat4("projection", mCamera3.getPerspectiveProjectionMatrix());
+   mCubeTexture->bind(0, mDiffuseShader->getUniformLocation("diffuseTex"));
+   // Loop over the cube meshes and render each one
    for (unsigned int i = 0,
-        size = static_cast<unsigned int>(mGroundMeshes.size());
+        size = static_cast<unsigned int>(mCubeMeshes.size());
         i < size;
         ++i)
    {
-      mGroundMeshes[i].Render();
+      mCubeMeshes[i].Render();
    }
-
-   mGroundTexture->unbind(0);
-   mGroundShader->use(false);
+   mCubeTexture->unbind(0);
+   mDiffuseShader->use(false);
 
    ImGui::Render();
    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -151,52 +146,29 @@ void PlayState::exit()
 
 }
 
-void PlayState::loadGround()
+void PlayState::loadModels()
 {
-   // Load the texture of the ground
-   mGroundTexture = ResourceManager<Texture>().loadUnmanagedResource<TextureLoader>("resources/models/table/wooden_floor.jpg");
+   // Load the texture of the cube
+   mCubeTexture = ResourceManager<Texture>().loadUnmanagedResource<TextureLoader>("resources/models/cube/cube.png");
 
-   // Load the ground
-   cgltf_data* data = LoadGLTFFile("resources/models/table/wooden_floor.glb");
-   mGroundMeshes = LoadStaticMeshes(data);
+   // Load the cube
+   cgltf_data* data = LoadGLTFFile("resources/models/cube/cube.glb");
+   mCubeMeshes = LoadStaticMeshes(data);
    FreeGLTFFile(data);
 
-   int positionsAttribLocOfStaticShader = mGroundShader->getAttributeLocation("position");
-   int normalsAttribLocOfStaticShader   = mGroundShader->getAttributeLocation("normal");
-   int texCoordsAttribLocOfStaticShader = mGroundShader->getAttributeLocation("texCoord");
+   int positionsAttribLoc = mDiffuseShader->getAttributeLocation("position");
+   int normalsAttribLoc   = mDiffuseShader->getAttributeLocation("normal");
+   int texCoordsAttribLoc = mDiffuseShader->getAttributeLocation("texCoord");
    for (unsigned int i = 0,
-        size = static_cast<unsigned int>(mGroundMeshes.size());
+        size = static_cast<unsigned int>(mCubeMeshes.size());
         i < size;
         ++i)
    {
-      mGroundMeshes[i].ConfigureVAO(positionsAttribLocOfStaticShader,
-                                    normalsAttribLocOfStaticShader,
-                                    texCoordsAttribLocOfStaticShader);
+      mCubeMeshes[i].ConfigureVAO(positionsAttribLoc,
+                                  normalsAttribLoc,
+                                  texCoordsAttribLoc);
    }
 }
-
-void PlayState::configureLights(const std::shared_ptr<Shader>& shader)
-{
-   shader->use(true);
-   shader->setUniformVec3("pointLights[0].worldPos", glm::vec3(0.0f, 2.0f, 10.0f));
-   shader->setUniformVec3("pointLights[0].color", glm::vec3(1.0f, 0.95f, 0.9f));
-   shader->setUniformFloat("pointLights[0].constantAtt", 1.0f);
-   shader->setUniformFloat("pointLights[0].linearAtt", 0.01f);
-   shader->setUniformFloat("pointLights[0].quadraticAtt", 0.0f);
-   shader->setUniformVec3("pointLights[1].worldPos", glm::vec3(0.0f, 2.0f, -10.0f));
-   shader->setUniformVec3("pointLights[1].color", glm::vec3(1.0f, 0.95f, 0.9f));
-   shader->setUniformFloat("pointLights[1].constantAtt", 1.0f);
-   shader->setUniformFloat("pointLights[1].linearAtt", 0.01f);
-   shader->setUniformFloat("pointLights[1].quadraticAtt", 0.0f);
-   shader->setUniformInt("numPointLightsInScene", 2);
-   shader->use(false);
-}
-
-#ifdef __EMSCRIPTEN__
-EM_JS(void, openReadme, (), {
-   window.open("https://github.com/diegomacario/Simple-Physics/blob/main/README.md");
-});
-#endif
 
 void PlayState::userInterface()
 {
@@ -205,16 +177,6 @@ void PlayState::userInterface()
    char title[64];
    snprintf(title, 32, "Simple Physics (%.1f FPS)###SimplePhysics", ImGui::GetIO().Framerate);
    ImGui::Begin(title, nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize);
-
-#ifdef __EMSCRIPTEN__
-   ImGui::Text("Click the button below to learn more about this\n"
-               "project:");
-
-   if (ImGui::Button("Open README"))
-   {
-      openReadme();
-   }
-#endif
 
    if (ImGui::CollapsingHeader("Controls", nullptr, ImGuiTreeNodeFlags_DefaultOpen))
    {
