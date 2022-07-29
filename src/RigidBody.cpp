@@ -2,15 +2,15 @@
 
 #include "RigidBody.h"
 
-RigidBody::RigidBody(float     mass,
-                     float     width,
-                     float     height,
-                     float     depth,
-                     float     coefficientOfRestitution,
-                     glm::vec3 positionOfCM,
-                     glm::mat3 orientation,
-                     glm::vec3 velocityOfCM,
-                     glm::vec3 angularMomentum)
+RigidBody::RigidBody(float            mass,
+                     float            width,
+                     float            height,
+                     float            depth,
+                     float            coefficientOfRestitution,
+                     const glm::vec3& positionOfCM,
+                     const glm::mat3& orientation,
+                     const glm::vec3& velocityOfCM,
+                     const glm::vec3& angularMomentum)
    : mOneOverMass(1.0f / mass)
    , mWidth(width)
    , mHeight(height)
@@ -82,10 +82,10 @@ RigidBody::KinematicAndDynamicState::KinematicAndDynamicState()
 
 }
 
-RigidBody::KinematicAndDynamicState::KinematicAndDynamicState(glm::vec3 positionOfCenterOfMass,
-                                                              glm::mat3 orientation,
-                                                              glm::vec3 velocityOfCenterOfMass,
-                                                              glm::vec3 angularMomentum)
+RigidBody::KinematicAndDynamicState::KinematicAndDynamicState(const glm::vec3& positionOfCenterOfMass,
+                                                              const glm::mat3& orientation,
+                                                              const glm::vec3& velocityOfCenterOfMass,
+                                                              const glm::vec3& angularMomentum)
    : positionOfCM(positionOfCenterOfMass)
    , orientation(orientation)
    , velocityOfCM(velocityOfCenterOfMass)

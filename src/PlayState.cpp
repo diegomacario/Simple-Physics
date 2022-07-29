@@ -114,6 +114,7 @@ void PlayState::render()
    glClear(GL_DEPTH_BUFFER_BIT);
 
    renderRigidBodies();
+   renderWalls();
 
    ImGui::Render();
    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -141,9 +142,18 @@ void PlayState::loadModels()
    mCubeMeshes = LoadStaticMeshes(data);
    FreeGLTFFile(data);
 
+   // Load the texture of the plane
+   mPlaneTexture = ResourceManager<Texture>().loadUnmanagedResource<TextureLoader>("resources/models/plane/plane.png");
+
+   // Load the plane
+   data = LoadGLTFFile("resources/models/plane/plane.glb");
+   mPlaneMeshes = LoadStaticMeshes(data);
+   FreeGLTFFile(data);
+
    int positionsAttribLoc = mDiffuseShader->getAttributeLocation("position");
    int normalsAttribLoc   = mDiffuseShader->getAttributeLocation("normal");
    int texCoordsAttribLoc = mDiffuseShader->getAttributeLocation("texCoord");
+
    for (unsigned int i = 0,
         size = static_cast<unsigned int>(mCubeMeshes.size());
         i < size;
@@ -152,6 +162,16 @@ void PlayState::loadModels()
       mCubeMeshes[i].ConfigureVAO(positionsAttribLoc,
                                   normalsAttribLoc,
                                   texCoordsAttribLoc);
+   }
+
+   for (unsigned int i = 0,
+        size = static_cast<unsigned int>(mPlaneMeshes.size());
+        i < size;
+        ++i)
+   {
+      mPlaneMeshes[i].ConfigureVAO(positionsAttribLoc,
+                                   normalsAttribLoc,
+                                   texCoordsAttribLoc);
    }
 }
 
@@ -216,5 +236,32 @@ void PlayState::renderRigidBodies()
    }
 
    mCubeTexture->unbind(0);
+   mDiffuseShader->use(false);
+}
+
+void PlayState::renderWalls()
+{
+   mDiffuseShader->use(true);
+   mDiffuseShader->setUniformMat4("view",       mCamera3.getViewMatrix());
+   mDiffuseShader->setUniformMat4("projection", mCamera3.getPerspectiveProjectionMatrix());
+   mPlaneTexture->bind(0, mDiffuseShader->getUniformLocation("diffuseTex"));
+
+   // Loop over the walls and render each one
+   const std::vector<Wall>& walls = mWorld.getWalls();
+   for (const Wall& wall : walls)
+   {
+      mDiffuseShader->setUniformMat4("model", wall.getModelMatrix());
+
+      // Loop over the plane meshes and render each one
+      for (unsigned int i = 0,
+           size = static_cast<unsigned int>(mPlaneMeshes.size());
+           i < size;
+           ++i)
+      {
+         mPlaneMeshes[i].Render();
+      }
+   }
+
+   mPlaneTexture->unbind(0);
    mDiffuseShader->use(false);
 }

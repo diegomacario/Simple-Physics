@@ -15,15 +15,15 @@ class RigidBody
 {
 public:
 
-   RigidBody(float     mass,
-             float     width,
-             float     height,
-             float     depth,
-             float     coefficientOfRestitution,
-             glm::vec3 positionOfCM,
-             glm::mat3 orientation,
-             glm::vec3 velocityOfCM,
-             glm::vec3 angularMomentum);
+   RigidBody(float            mass,
+             float            width,
+             float            height,
+             float            depth,
+             float            coefficientOfRestitution,
+             const glm::vec3& positionOfCM,
+             const glm::mat3& orientation,
+             const glm::vec3& velocityOfCM,
+             const glm::vec3& angularMomentum);
    ~RigidBody() = default;
 
    void      calculateWorldSpaceVertices(RigidBodyState state);
@@ -42,10 +42,10 @@ private:
    struct KinematicAndDynamicState
    {
       KinematicAndDynamicState();
-      KinematicAndDynamicState(glm::vec3 positionOfCM,
-                               glm::mat3 orientation,
-                               glm::vec3 velocityOfCM,
-                               glm::vec3 angularMomentum);
+      KinematicAndDynamicState(const glm::vec3& positionOfCM,
+                               const glm::mat3& orientation,
+                               const glm::vec3& velocityOfCM,
+                               const glm::vec3& angularMomentum);
 
       glm::vec3                positionOfCM;
       glm::mat3                orientation;
