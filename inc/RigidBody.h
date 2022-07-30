@@ -26,19 +26,6 @@ public:
              const glm::vec3& angularMomentum);
    ~RigidBody() = default;
 
-   void      calculateWorldSpaceVertices(RigidBodyState state);
-   glm::mat4 getModelMatrix(RigidBodyState state) const;
-
-private:
-
-   float                                   mOneOverMass;
-   float                                   mWidth;
-   float                                   mHeight;
-   float                                   mDepth;
-   float                                   mCoefficientOfRestitution;
-   glm::mat3                               mInverseInertiaTensorInLocalSpace;
-   std::array<glm::vec3, 8>                mVerticesInLocalSpace;
-
    struct KinematicAndDynamicState
    {
       KinematicAndDynamicState();
@@ -61,6 +48,24 @@ private:
 
       std::array<glm::vec3, 8> verticesInWorldSpace;
    };
+
+   void                      calculateWorldSpaceVertices(RigidBodyState state);
+   glm::mat4                 getModelMatrix(RigidBodyState state) const;
+   KinematicAndDynamicState& getState(RigidBodyState state) { return mStates[state]; }
+   float                     getOneOverMass() const { return mOneOverMass; }
+   float                     getCoefficientOfRestitution() const { return mCoefficientOfRestitution; }
+   glm::mat3                 getInverseInertiaTensorInLocalSpace() const { return mInverseInertiaTensorInLocalSpace; }
+   void                      swapStates();
+
+private:
+
+   float                                   mOneOverMass;
+   float                                   mWidth;
+   float                                   mHeight;
+   float                                   mDepth;
+   float                                   mCoefficientOfRestitution;
+   glm::mat3                               mInverseInertiaTensorInLocalSpace;
+   std::array<glm::vec3, 8>                mVerticesInLocalSpace;
 
    std::array<KinematicAndDynamicState, 2> mStates;
 };

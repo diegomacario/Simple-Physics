@@ -93,7 +93,8 @@ void PlayState::processInput()
 
 void PlayState::update(float deltaTime)
 {
-
+   // TODO: Handle simulation errors
+   mWorld.simulate(deltaTime);
 }
 
 void PlayState::render()

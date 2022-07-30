@@ -46,7 +46,7 @@ void RigidBody::calculateWorldSpaceVertices(RigidBodyState state)
 {
    glm::vec3& translation = mStates[state].positionOfCM;
    glm::mat3& rotation = mStates[state].orientation;
-   std::array<glm::vec3, 8> worldSpaceVertices = mStates[state].verticesInWorldSpace;
+   std::array<glm::vec3, 8>& worldSpaceVertices = mStates[state].verticesInWorldSpace;
 
    for (int i = 0; i < 8; ++i)
    {
@@ -66,6 +66,13 @@ glm::mat4 RigidBody::getModelMatrix(RigidBodyState state) const
    modelMatrix = glm::scale(modelMatrix, glm::vec3(mWidth, mHeight, mDepth));
 
    return modelMatrix;
+}
+
+void RigidBody::swapStates()
+{
+   KinematicAndDynamicState tempState = mStates[current];
+   mStates[current] = mStates[future];
+   mStates[future]  = tempState;
 }
 
 RigidBody::KinematicAndDynamicState::KinematicAndDynamicState()

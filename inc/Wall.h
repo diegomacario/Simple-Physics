@@ -21,6 +21,8 @@ public:
    ~Wall() = default;
 
    glm::mat4 getModelMatrix() const;
+   glm::vec3 getNormal() const { return mNormal; }
+   float     getD() const { return mD; }
 
 private:
 
