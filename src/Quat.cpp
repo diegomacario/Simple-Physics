@@ -1,6 +1,6 @@
 #include <glm/gtx/norm.hpp>
 
-#include "quat.h"
+#include "Quat.h"
 
 Q::quat Q::angleAxis(float angle, const glm::vec3& axis)
 {

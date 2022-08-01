@@ -4,7 +4,7 @@
 #include <emscripten/emscripten.h>
 #endif
 
-#include "game.h"
+#include "Game.h"
 
 #ifdef __EMSCRIPTEN__
 Game game;

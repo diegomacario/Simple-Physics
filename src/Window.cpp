@@ -4,7 +4,7 @@
 
 #include <iostream>
 
-#include "window.h"
+#include "Window.h"
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten/emscripten.h>

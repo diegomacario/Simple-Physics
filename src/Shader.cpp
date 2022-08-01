@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-#include "shader.h"
+#include "Shader.h"
 
 Shader::Shader(unsigned int shaderProgID,
                std::map<std::string, unsigned int>&& attributes,

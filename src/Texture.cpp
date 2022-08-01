@@ -1,6 +1,6 @@
 #include <utility>
 
-#include "texture.h"
+#include "Texture.h"
 
 Texture::Texture(unsigned int texID)
    : mTexID(texID)

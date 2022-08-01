@@ -1,7 +1,7 @@
 #include <iostream>
 
 #include "PlayState.h"
-#include "game.h"
+#include "Game.h"
 
 Game::Game()
    : mFSM()
