@@ -71,10 +71,10 @@ void PlayState::processInput()
       mWindow->setKeyAsProcessed(GLFW_KEY_8);
       mWindow->setNumberOfSamples(8);
    }
+#endif
 
    // Reset the camera
    if (mWindow->keyIsPressed(GLFW_KEY_R)) { resetCamera(); }
-#endif
 
    // Orient the camera
    if (mWindow->mouseMoved() && mWindow->isMouseButtonPressed(GLFW_MOUSE_BUTTON_LEFT))
@@ -189,9 +189,7 @@ void PlayState::userInterface()
       ImGui::BulletText("Hold the left mouse button and move the mouse\n"
                         "to rotate the camera around the scene.");
       ImGui::BulletText("Use the scroll wheel to zoom in and out.");
-#ifndef __EMSCRIPTEN__
       ImGui::BulletText("Press the R key to reset the camera.");
-#endif
    }
 
    if (ImGui::CollapsingHeader("Settings", nullptr, ImGuiTreeNodeFlags_DefaultOpen))
