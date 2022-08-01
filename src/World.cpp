@@ -21,13 +21,13 @@ void World::initializeRigidBodies()
    orientation[2][2] = 1;
 
    mRigidBodies.emplace_back(1.0f, // Mass
-                             0.25f, // Width
+                             0.5f, // Width
                              0.25f, // Height
                              0.25f, // Depth
-                             0.75f, // Coefficient of restitution
+                             1.0f, // Coefficient of restitution
                              glm::vec3(0.0f, 0.0f, 0.0f), // Position of CM
                              orientation, // Orientation
-                             glm::vec3(-1.0f, 0.0f, -1.0f), // Velocity of CM,
+                             glm::vec3(-1.0f, -1.0f, -1.0f), // Velocity of CM,
                              glm::vec3(0.0f)); // Angular momentum
 }
 
@@ -72,7 +72,7 @@ bool World::simulate(float deltaTime)
 
       computeForces();
 
-      integrate(targetTime - currentTime);
+      integrateUsingRK4(targetTime - currentTime);
 
       // Calculate the world-space vertices of each rigid body at the target time
       for (std::vector<RigidBody>::iterator iter = mRigidBodies.begin(); iter != mRigidBodies.end(); ++iter)
@@ -122,11 +122,11 @@ void World::computeForces()
       currentState.torque = glm::vec3(0.0f);
 
       // Force = Mass * Acceleration
-      currentState.forceOfCM = glm::vec3(0.0f, -10.0f, 0.0f) / iter->getOneOverMass();
+      currentState.forceOfCM = glm::vec3(0.0f, 0.0f, 0.0f) / iter->getOneOverMass();
    }
 }
 
-void World::integrate(float deltaTime)
+void World::integrateUsingEulers(float deltaTime)
 {
    for (std::vector<RigidBody>::iterator iter = mRigidBodies.begin(); iter != mRigidBodies.end(); ++iter)
    {
@@ -146,6 +146,109 @@ void World::integrate(float deltaTime)
       orthonormalizeOrientation(futureState.orientation);
 
       // Compute auxiliary quantities
+
+      futureState.inverseInertiaTensorInWorldSpace = futureState.orientation * iter->getInverseInertiaTensorInLocalSpace() * glm::transpose(futureState.orientation);
+
+      futureState.angularVelocity = futureState.inverseInertiaTensorInWorldSpace * futureState.angularMomentum;
+   }
+}
+
+void World::integrateUsingRK4(float deltaTime)
+{
+   for (std::vector<RigidBody>::iterator iter = mRigidBodies.begin(); iter != mRigidBodies.end(); ++iter)
+   {
+      RigidBody::KinematicAndDynamicState& currentState = iter->getState(current);
+      RigidBody::KinematicAndDynamicState& futureState  = iter->getState(future);
+
+      float midPointOfDeltaTime = deltaTime / 2.0f;
+
+      // Calculate new position and velocity using the classical 4th order Runge-Kutta method
+
+      // We want to solve this 2nd order ODE:
+      // F = M * X^dotdot
+      // We can solve it by writing it as a system of two 1rst order ODEs:
+      // [X^dot] = [  V  ]
+      // [V^dot] = [F / M]
+      // Where we want to find the position (X) and the velocity (V)
+
+      glm::vec3 k1Pos                     = currentState.velocityOfCM;
+      glm::vec3 k1Vel                     = (iter->getOneOverMass() * currentState.forceOfCM);
+
+      //glm::vec3 posAtMidPointOfDeltaTime1 = currentState.positionOfCM + (k1Pos * midPointOfDeltaTime);
+      glm::vec3 velAtMidPointOfDeltaTime1 = currentState.velocityOfCM + (k1Vel * midPointOfDeltaTime);
+
+      glm::vec3 k2Pos                     = velAtMidPointOfDeltaTime1;
+      glm::vec3 k2Vel                     = (iter->getOneOverMass() * currentState.forceOfCM);
+
+      //glm::vec3 posAtMidPointOfDeltaTime2 = currentState.positionOfCM + (k2Pos * midPointOfDeltaTime);
+      glm::vec3 velAtMidPointOfDeltaTime2 = currentState.velocityOfCM + (k2Vel * midPointOfDeltaTime);
+
+      glm::vec3 k3Pos                     = velAtMidPointOfDeltaTime2;
+      glm::vec3 k3Vel                     = (iter->getOneOverMass() * currentState.forceOfCM);
+
+      //glm::vec3 posAtDeltaTime            = currentState.positionOfCM + (k3Pos * deltaTime);
+      glm::vec3 velAtDeltaTime            = currentState.velocityOfCM + (k3Vel * deltaTime);
+
+      glm::vec3 k4Pos                     = velAtDeltaTime;
+      glm::vec3 k4Vel                     = (iter->getOneOverMass() * currentState.forceOfCM);
+
+      glm::vec3 weightedAverageOfPositionSlopes = ((k1Pos + (2.0f * k2Pos) + (2.0f * k3Pos) + k4Pos) / 6.0f);
+      glm::vec3 weightedAverageOfVelocitySlopes = ((k1Vel + (2.0f * k2Vel) + (2.0f * k3Vel) + k4Vel) / 6.0f);
+
+      // P_n+1 = P_n + (weightedAverageOfPositionSlopes * h)
+      futureState.positionOfCM = currentState.positionOfCM + (weightedAverageOfPositionSlopes * deltaTime);
+
+      // V_n+1 = V_n + (weightedAverageOfVelocitySlopes * h)
+      futureState.velocityOfCM = currentState.velocityOfCM + (weightedAverageOfVelocitySlopes * deltaTime);
+
+      // Calculate new orientation and angular velocity using the classical 4th order Runge-Kutta method
+
+      // We want to solve this 2nd order ODE:
+      // T = L^dot = (I * W)^dot = I * W^dotdot
+      // We can solve it by writing it as a system of two 1rst order ODEs:
+      // [O^dot] = [ W ]
+      // [L^dot] = [ T ]
+      // Where we want to find the orientation (O) and the angular velocity (W)
+
+      glm::vec3 k1Orientation     = currentState.angularVelocity;
+      glm::vec3 k1AngularMomentum = currentState.torque;
+
+      glm::mat3 orientationAtMidPointOfDeltaTime1 = currentState.orientation + (glm::matrixCross3(k1Orientation) * currentState.orientation * midPointOfDeltaTime);
+      orthonormalizeOrientation(orientationAtMidPointOfDeltaTime1);
+      glm::vec3 angularMomentumAtMidPointOfDeltaTime1 = currentState.angularMomentum + (k1AngularMomentum * midPointOfDeltaTime);
+      glm::mat3 inverseInertiaTensorInWorldSpaceAtMidPointOfDeltaTime1 = orientationAtMidPointOfDeltaTime1 * iter->getInverseInertiaTensorInLocalSpace() * glm::transpose(orientationAtMidPointOfDeltaTime1);
+      glm::vec3 angularVelocityAtMidPointOfDeltaTime1 = inverseInertiaTensorInWorldSpaceAtMidPointOfDeltaTime1 * angularMomentumAtMidPointOfDeltaTime1;
+
+      glm::vec3 k2Orientation     = angularVelocityAtMidPointOfDeltaTime1;
+      glm::vec3 k2AngularMomentum = currentState.torque;
+
+      glm::mat3 orientationAtMidPointOfDeltaTime2 = currentState.orientation + (glm::matrixCross3(k2Orientation) * currentState.orientation * midPointOfDeltaTime);
+      orthonormalizeOrientation(orientationAtMidPointOfDeltaTime2);
+      glm::vec3 angularMomentumAtMidPointOfDeltaTime2 = currentState.angularMomentum + (k2AngularMomentum * midPointOfDeltaTime);
+      glm::mat3 inverseInertiaTensorInWorldSpaceAtMidPointOfDeltaTime2 = orientationAtMidPointOfDeltaTime2 * iter->getInverseInertiaTensorInLocalSpace() * glm::transpose(orientationAtMidPointOfDeltaTime2);
+      glm::vec3 angularVelocityAtMidPointOfDeltaTime2 = inverseInertiaTensorInWorldSpaceAtMidPointOfDeltaTime2 * angularMomentumAtMidPointOfDeltaTime2;
+
+      glm::vec3 k3Orientation     = angularVelocityAtMidPointOfDeltaTime2;
+      glm::vec3 k3AngularMomentum = currentState.torque;
+
+      glm::mat3 orientationAtDeltaTime = currentState.orientation + (glm::matrixCross3(k3Orientation) * currentState.orientation * deltaTime);
+      orthonormalizeOrientation(orientationAtDeltaTime);
+      glm::vec3 angularMomentumAtDeltaTime = currentState.angularMomentum + (k3AngularMomentum * deltaTime);
+      glm::mat3 inverseInertiaTensorInWorldSpaceAtDeltaTime = orientationAtDeltaTime * iter->getInverseInertiaTensorInLocalSpace() * glm::transpose(orientationAtDeltaTime);
+      glm::vec3 angularVelocityAtDeltaTime = inverseInertiaTensorInWorldSpaceAtDeltaTime * angularMomentumAtDeltaTime;
+
+      glm::vec3 k4Orientation     = angularVelocityAtDeltaTime;
+      glm::vec3 k4AngularMomentum = currentState.torque;
+
+      glm::vec3 weightedAverageOfOrientationSlopes = ((k1Orientation + (2.0f * k2Orientation) + (2.0f * k3Orientation) + k4Orientation) / 6.0f);
+      glm::vec3 weightedAverageOfAngularMomentumSlopes = ((k1AngularMomentum + (2.0f * k2AngularMomentum) + (2.0f * k3AngularMomentum) + k4AngularMomentum) / 6.0f);
+
+      // O_n+1 = O_n + (W^~_n * O_n * h)
+      futureState.orientation = currentState.orientation + (glm::matrixCross3(weightedAverageOfOrientationSlopes) * currentState.orientation * deltaTime);
+      orthonormalizeOrientation(futureState.orientation);
+
+      // L_n+1 = L_n + (T_n * h)
+      futureState.angularMomentum = currentState.angularMomentum + (weightedAverageOfAngularMomentumSlopes * deltaTime);
 
       futureState.inverseInertiaTensorInWorldSpace = futureState.orientation * iter->getInverseInertiaTensorInLocalSpace() * glm::transpose(futureState.orientation);
 

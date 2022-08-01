@@ -16,7 +16,7 @@ PlayState::PlayState(const std::shared_ptr<FiniteStateMachine>& finiteStateMachi
                      const std::shared_ptr<Window>&             window)
    : mFSM(finiteStateMachine)
    , mWindow(window)
-   , mCamera3(7.5f, 25.0f, glm::vec3(0.0f), Q::quat(), glm::vec3(0.0f, 0.0f, 0.0f), 2.0f, 20.0f, -90.0f, 90.0f, 45.0f, 1280.0f / 720.0f, 0.1f, 130.0f, 0.25f)
+   , mCamera3(4.5f, 0.0f, glm::vec3(0.0f), Q::quat(), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, 10.0f, -90.0f, 90.0f, 45.0f, 1280.0f / 720.0f, 0.1f, 130.0f, 0.25f)
 {
    // Initialize the diffuse shader
    mDiffuseShader = ResourceManager<Shader>().loadUnmanagedResource<ShaderLoader>("resources/shaders/diffuse.vert",
@@ -209,7 +209,7 @@ void PlayState::resetScene()
 
 void PlayState::resetCamera()
 {
-   mCamera3.reposition(7.5f, 25.0f, glm::vec3(0.0f), Q::quat(), glm::vec3(0.0f, 0.0f, 0.0f), 2.0f, 20.0f, -90.0f, 90.0f);
+   mCamera3.reposition(4.5f, 0.0f, glm::vec3(0.0f), Q::quat(), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, 10.0f, -90.0f, 90.0f);
    mCamera3.processMouseMovement(180.0f / 0.25f, 0.0f);
 }
 

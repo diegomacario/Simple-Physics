@@ -32,7 +32,8 @@ private:
 
    void                          computeForces();
 
-   void                          integrate(float deltaTime);
+   void                          integrateUsingEulers(float deltaTime);
+   void                          integrateUsingRK4(float deltaTime);
 
    CollisionState                checkForCollisions();
 
