@@ -9,6 +9,7 @@
 #include "ResourceManager.h"
 #include "ShaderLoader.h"
 #include "GLTFLoader.h"
+#include "TextureLoader.h"
 #include "Transform.h"
 #include "DecalRenderer.h"
 
@@ -23,7 +24,14 @@ DecalRenderer::DecalRenderer(unsigned int widthOfFramebuffer, unsigned int heigh
    // Initialize the full screen quad with depth texture shader
    mFullScreenQuadWithDepthTextureShader = ResourceManager<Shader>().loadUnmanagedResource<ShaderLoader>("resources/shaders/full_screen_quad_with_depth_texture_shader.vert", "resources/shaders/full_screen_quad_with_depth_texture_shader.frag");
 
+   // Initialize the decal shader
+   mDecalShader = ResourceManager<Shader>().loadUnmanagedResource<ShaderLoader>("resources/shaders/decal.vert", "resources/shaders/decal.frag");
+
+   // Load the texture of the decal
+   mDecalTexture = ResourceManager<Texture>().loadUnmanagedResource<TextureLoader>("resources/models/decal/decal.png");
+
    loadQuad();
+   loadCube();
 }
 
 DecalRenderer::~DecalRenderer()
@@ -40,6 +48,38 @@ void DecalRenderer::bindDepthFBO()
 void DecalRenderer::unbindDepthFBO()
 {
    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void DecalRenderer::renderDecals(const glm::mat4& viewMatrix, const glm::mat4& perspectiveProjectionMatrix)
+{
+   mDecalShader->use(true);
+   Transform modelTransform(glm::vec3(-2.5f * 0.5f, 0.0f, 0.0f), Q::quat(), glm::vec3(1.0f, 1.0f, 1.0f));
+   mDecalShader->setUniformMat4("model", transformToMat4(modelTransform));
+   mDecalShader->setUniformMat4("view", viewMatrix);
+   mDecalShader->setUniformMat4("projection", perspectiveProjectionMatrix);
+   mDecalShader->setUniformFloat("width", mWidthOfFramebuffer);
+   mDecalShader->setUniformFloat("height", mHeightOfFramebuffer);
+   glActiveTexture(GL_TEXTURE0);
+   glBindTexture(GL_TEXTURE_2D, mDepthTexture);
+   mDecalShader->setUniformInt("depthTex", 0);
+   mDecalTexture->bind(1, mDecalShader->getUniformLocation("decalTex"));
+   mDecalShader->setUniformMat4("inverseModel", glm::inverse(transformToMat4(modelTransform)));
+   mDecalShader->setUniformMat4("inverseView", glm::inverse(viewMatrix));
+   mDecalShader->setUniformMat4("inverseProjection", glm::inverse(perspectiveProjectionMatrix));
+
+   // Loop over the cube meshes and render each one
+   for (unsigned int i = 0,
+        size = static_cast<unsigned int>(mCubeMeshes.size());
+        i < size;
+        ++i)
+   {
+      mCubeMeshes[i].Render();
+   }
+
+   glActiveTexture(GL_TEXTURE0);
+   glBindTexture(GL_TEXTURE_2D, 0);
+   mDecalTexture->unbind(1);
+   mDecalShader->use(false);
 }
 
 void DecalRenderer::renderDepthTextureToFullScreenQuad()
@@ -127,3 +167,25 @@ void DecalRenderer::loadQuad()
                                   texCoordsAttribLoc);
    }
 }
+
+void DecalRenderer::loadCube()
+{
+   cgltf_data* data = LoadGLTFFile("resources/models/cube/cube.glb");
+   mCubeMeshes = LoadStaticMeshes(data);
+   FreeGLTFFile(data);
+
+   int positionsAttribLoc = mDecalShader->getAttributeLocation("position");
+   int normalsAttribLoc   = mDecalShader->getAttributeLocation("normal");
+   int texCoordsAttribLoc = mDecalShader->getAttributeLocation("texCoord");
+
+   for (unsigned int i = 0,
+        size = static_cast<unsigned int>(mCubeMeshes.size());
+        i < size;
+        ++i)
+   {
+      mCubeMeshes[i].ConfigureVAO(positionsAttribLoc,
+                                  normalsAttribLoc,
+                                  texCoordsAttribLoc);
+   }
+}
+

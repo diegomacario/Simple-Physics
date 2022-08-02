@@ -112,7 +112,6 @@ void PlayState::render()
    mDecalRenderer->bindDepthFBO();
    glClear(GL_DEPTH_BUFFER_BIT);
    renderWalls();
-   renderRigidBodies();
    mDecalRenderer->unbindDepthFBO();
 
 #ifndef __EMSCRIPTEN__
@@ -124,9 +123,10 @@ void PlayState::render()
    glEnable(GL_DEPTH_TEST);
    glClear(GL_DEPTH_BUFFER_BIT);
 
-   //renderWalls();
-   //renderRigidBodies();
-   mDecalRenderer->renderDepthTextureToFullScreenQuad();
+   renderWalls();
+   renderRigidBodies();
+   //mDecalRenderer->renderDepthTextureToFullScreenQuad();
+   mDecalRenderer->renderDecals(mCamera3.getViewMatrix(), mCamera3.getPerspectiveProjectionMatrix());
 
    ImGui::Render();
    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

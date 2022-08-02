@@ -3,6 +3,7 @@
 
 #include "Shader.h"
 #include "AnimatedMesh.h"
+#include "Texture.h"
 
 class DecalRenderer
 {
@@ -19,6 +20,7 @@ public:
 
    void         bindDepthFBO();
    void         unbindDepthFBO();
+   void         renderDecals(const glm::mat4& viewMatrix, const glm::mat4& perspectiveProjectionMatrix);
    void         renderDepthTextureToFullScreenQuad();
    void         resizeDepthTexture(unsigned int widthOfFramebuffer, unsigned int heightOfFramebuffer);
 
@@ -29,6 +31,7 @@ private:
    unsigned int createDepthTextureAttachment();
 
    void         loadQuad();
+   void         loadCube();
 
    unsigned int              mWidthOfFramebuffer;
    unsigned int              mHeightOfFramebuffer;
@@ -36,8 +39,12 @@ private:
    unsigned int              mDepthTexture;
 
    std::shared_ptr<Shader>   mFullScreenQuadWithDepthTextureShader;
+   std::shared_ptr<Shader>   mDecalShader;
 
    std::vector<AnimatedMesh> mQuadMeshes;
+   std::vector<AnimatedMesh> mCubeMeshes;
+
+   std::shared_ptr<Texture>  mDecalTexture;
 };
 
 #endif
