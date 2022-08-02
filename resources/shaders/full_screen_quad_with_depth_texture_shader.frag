@@ -20,8 +20,8 @@ void main()
    float depth = texture(depthTex, uv).r;
 
    // The linearized depth is unbounded, since it's the depth in world space
-   // We scale it by 0.1 to make it small because we want to use it as a color, and colors range from 0.0 to 1.0
-   depth = linearizeDepth(depth) * 0.1;
+   // We scale it by 0.075 to make it small because we want to use it as a color, and colors range from 0.0 to 1.0
+   depth = linearizeDepth(depth) * 0.075;
 
    fragColor = vec4(vec3(depth), 1.0);
 }

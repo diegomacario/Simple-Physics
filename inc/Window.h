@@ -10,6 +10,8 @@
 
 #include <bitset>
 
+#include "DecalRenderer.h"
+
 // TODO: Take advantage of inlining in this class.
 class Window
 {
@@ -83,6 +85,8 @@ public:
    int          getHeightOfViewportInPix() const { return mHeightOfViewportInPix; };
    void         setViewport();
 
+   void         setDecalRenderer(const std::shared_ptr<DecalRenderer>& decalRenderer) { mDecalRenderer = decalRenderer; }
+
 private:
 
    void         setInputCallbacks();
@@ -137,6 +141,8 @@ private:
    int                            mLowerLeftCornerOfViewportYInPix;
    int                            mWidthOfViewportInPix;
    int                            mHeightOfViewportInPix;
+
+   std::shared_ptr<DecalRenderer> mDecalRenderer;
 };
 
 #endif

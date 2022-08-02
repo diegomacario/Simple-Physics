@@ -61,7 +61,7 @@ private:
 
    World                                  mWorld;
 
-   DecalRenderer                          mDecalRenderer;
+   std::shared_ptr<DecalRenderer>         mDecalRenderer;
 };
 
 #endif

@@ -12,8 +12,10 @@
 #include "Transform.h"
 #include "DecalRenderer.h"
 
-DecalRenderer::DecalRenderer()
-   : mDepthFBO(0)
+DecalRenderer::DecalRenderer(unsigned int widthOfFramebuffer, unsigned int heightOfFramebuffer)
+   : mWidthOfFramebuffer(widthOfFramebuffer)
+   , mHeightOfFramebuffer(heightOfFramebuffer)
+   , mDepthFBO(0)
    , mDepthTexture(0)
 {
    configureDepthFBO();
@@ -49,8 +51,8 @@ void DecalRenderer::renderDepthTextureToFullScreenQuad()
    glActiveTexture(GL_TEXTURE0);
    glBindTexture(GL_TEXTURE_2D, mDepthTexture);
    mFullScreenQuadWithDepthTextureShader->setUniformInt("depthTex", 0);
-   mFullScreenQuadWithDepthTextureShader->setUniformFloat("width", 1280.0f * 2.0f);
-   mFullScreenQuadWithDepthTextureShader->setUniformFloat("height", 720.0f * 2.0f);
+   mFullScreenQuadWithDepthTextureShader->setUniformFloat("width", mWidthOfFramebuffer);
+   mFullScreenQuadWithDepthTextureShader->setUniformFloat("height", mHeightOfFramebuffer);
 
    // Loop over the quad meshes and render each one
    for (unsigned int i = 0,
@@ -66,12 +68,22 @@ void DecalRenderer::renderDepthTextureToFullScreenQuad()
    mFullScreenQuadWithDepthTextureShader->use(false);
 }
 
+void DecalRenderer::resizeDepthTexture(unsigned int widthOfFramebuffer, unsigned int heightOfFramebuffer)
+{
+   glBindTexture(GL_TEXTURE_2D, mDepthTexture);
+   glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, widthOfFramebuffer, heightOfFramebuffer, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+   glBindTexture(GL_TEXTURE_2D, 0);
+
+   mWidthOfFramebuffer  = widthOfFramebuffer;
+   mHeightOfFramebuffer = heightOfFramebuffer;
+}
+
 void DecalRenderer::configureDepthFBO()
 {
    glGenFramebuffers(1, &mDepthFBO);
    glBindFramebuffer(GL_FRAMEBUFFER, mDepthFBO);
 
-   mDepthTexture = createDepthTextureAttachment(1280 * 2, 720 * 2);
+   mDepthTexture = createDepthTextureAttachment();
 
    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
    {
@@ -81,13 +93,13 @@ void DecalRenderer::configureDepthFBO()
    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-unsigned int DecalRenderer::createDepthTextureAttachment(int width, int height)
+unsigned int DecalRenderer::createDepthTextureAttachment()
 {
    // Create a texture and use it as a depth attachment
    unsigned int depthTexture;
    glGenTextures(1, &depthTexture);
    glBindTexture(GL_TEXTURE_2D, depthTexture);
-   glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+   glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, mWidthOfFramebuffer, mHeightOfFramebuffer, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
    glBindTexture(GL_TEXTURE_2D, 0);

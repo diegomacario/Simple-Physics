@@ -634,4 +634,9 @@ void Window::updateBufferAndViewportSizes(int widthOfFramebufferInPix, int heigh
 #ifdef __EMSCRIPTEN__
    emscripten_set_element_css_size("canvas", getCanvasWidth(), getCanvasHeight());
 #endif
+
+   if (mDecalRenderer)
+   {
+      mDecalRenderer->resizeDepthTexture(mWidthOfFramebufferInPix, mHeightOfFramebufferInPix);
+   }
 }

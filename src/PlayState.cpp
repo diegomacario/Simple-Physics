@@ -17,12 +17,15 @@ PlayState::PlayState(const std::shared_ptr<FiniteStateMachine>& finiteStateMachi
    : mFSM(finiteStateMachine)
    , mWindow(window)
    , mCamera3(4.5f, 0.0f, glm::vec3(0.0f), Q::quat(), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, 10.0f, -90.0f, 90.0f, 45.0f, 1280.0f / 720.0f, 0.1f, 130.0f, 0.25f)
+   , mDecalRenderer(std::make_shared<DecalRenderer>(window->getWidthOfFramebufferInPix(), window->getHeightOfFramebufferInPix()))
 {
    // Initialize the diffuse shader
    mDiffuseShader = ResourceManager<Shader>().loadUnmanagedResource<ShaderLoader>("resources/shaders/diffuse.vert",
                                                                                   "resources/shaders/diffuse.frag");
 
    loadModels();
+
+   mWindow->setDecalRenderer(mDecalRenderer);
 }
 
 void PlayState::initializeState()
@@ -105,13 +108,12 @@ void PlayState::render()
 
    userInterface();
 
-   // Render the walls into the depth texture
-   mDecalRenderer.bindDepthFBO();
-   glViewport(0, 0, 1280 * 2, 720 * 2);
+   // Render the walls and rigid bodies into the depth texture
+   mDecalRenderer->bindDepthFBO();
    glClear(GL_DEPTH_BUFFER_BIT);
    renderWalls();
-   mDecalRenderer.unbindDepthFBO();
-   mWindow->setViewport();
+   renderRigidBodies();
+   mDecalRenderer->unbindDepthFBO();
 
 #ifndef __EMSCRIPTEN__
    mWindow->bindMultisampleFramebuffer();
@@ -122,9 +124,9 @@ void PlayState::render()
    glEnable(GL_DEPTH_TEST);
    glClear(GL_DEPTH_BUFFER_BIT);
 
-   //renderRigidBodies();
    //renderWalls();
-   mDecalRenderer.renderDepthTextureToFullScreenQuad();
+   //renderRigidBodies();
+   mDecalRenderer->renderDepthTextureToFullScreenQuad();
 
    ImGui::Render();
    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

@@ -14,6 +14,7 @@ include_directories("${CMAKE_SOURCE_DIR}/inc"
 set(project_headers
     inc/AnimatedMesh.h
     inc/Camera3.h
+    inc/DecalRenderer.h
     inc/FiniteStateMachine.h
     inc/Frame.h
     inc/Game.h
@@ -37,6 +38,7 @@ set(project_headers
 set(project_sources
     src/AnimatedMesh.cpp
     src/Camera3.cpp
+    src/DecalRenderer.cpp
     src/FiniteStateMachine.cpp
     src/Game.cpp
     src/GLTFLoader.cpp

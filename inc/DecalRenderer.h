@@ -8,7 +8,7 @@ class DecalRenderer
 {
 public:
 
-   DecalRenderer();
+   DecalRenderer(unsigned int widthOfFramebuffer, unsigned int heightOfFramebuffer);
    ~DecalRenderer();
 
    DecalRenderer(const DecalRenderer&) = delete;
@@ -20,15 +20,18 @@ public:
    void         bindDepthFBO();
    void         unbindDepthFBO();
    void         renderDepthTextureToFullScreenQuad();
+   void         resizeDepthTexture(unsigned int widthOfFramebuffer, unsigned int heightOfFramebuffer);
 
 private:
 
    void         configureDepthFBO();
 
-   unsigned int createDepthTextureAttachment(int width, int height);
+   unsigned int createDepthTextureAttachment();
 
    void         loadQuad();
 
+   unsigned int              mWidthOfFramebuffer;
+   unsigned int              mHeightOfFramebuffer;
    unsigned int              mDepthFBO;
    unsigned int              mDepthTexture;
 
