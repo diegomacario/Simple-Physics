@@ -10,6 +10,7 @@
 		041C94A028941FEE00781DEC /* World.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 041C949F28941FEE00781DEC /* World.cpp */; };
 		041C94A22894202800781DEC /* RigidBody.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 041C94A12894202800781DEC /* RigidBody.cpp */; };
 		041C94A528946B0900781DEC /* Wall.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 041C94A428946B0900781DEC /* Wall.cpp */; };
+		041C94A828983DDC00781DEC /* DecalRenderer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 041C94A728983DDC00781DEC /* DecalRenderer.cpp */; };
 		043A2D7B2847F178001E6F77 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 043A2D7A2847F178001E6F77 /* IOKit.framework */; };
 		043A2D7D2847F182001E6F77 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 043A2D7C2847F182001E6F77 /* Cocoa.framework */; };
 		043A2D7F2847F1B0001E6F77 /* imgui_tables.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 043A2D7E2847F1B0001E6F77 /* imgui_tables.cpp */; };
@@ -60,6 +61,8 @@
 		041C94A12894202800781DEC /* RigidBody.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = RigidBody.cpp; path = ../../src/RigidBody.cpp; sourceTree = "<group>"; };
 		041C94A328946AE900781DEC /* Wall.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Wall.h; path = ../../inc/Wall.h; sourceTree = "<group>"; };
 		041C94A428946B0900781DEC /* Wall.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Wall.cpp; path = ../../src/Wall.cpp; sourceTree = "<group>"; };
+		041C94A628983DBF00781DEC /* DecalRenderer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = DecalRenderer.h; path = ../../inc/DecalRenderer.h; sourceTree = "<group>"; };
+		041C94A728983DDC00781DEC /* DecalRenderer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = DecalRenderer.cpp; path = ../../src/DecalRenderer.cpp; sourceTree = "<group>"; };
 		043A2D7A2847F178001E6F77 /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; };
 		043A2D7C2847F182001E6F77 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		043A2D7E2847F1B0001E6F77 /* imgui_tables.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = imgui_tables.cpp; path = ../../dependencies/imgui/imgui/imgui_tables.cpp; sourceTree = "<group>"; };
@@ -215,6 +218,7 @@
 				04B904A52847E22700FF56D3 /* TextureLoader.cpp */,
 				04B904AC2847E22700FF56D3 /* Texture.cpp */,
 				04B904A62847E22700FF56D3 /* Window.cpp */,
+				041C94A728983DDC00781DEC /* DecalRenderer.cpp */,
 			);
 			name = Base;
 			sourceTree = "<group>";
@@ -261,6 +265,7 @@
 				04B904F32847E7E000FF56D3 /* TextureLoader.h */,
 				04B904F42847E7E000FF56D3 /* Texture.h */,
 				04B904EB2847E7E000FF56D3 /* Window.h */,
+				041C94A628983DBF00781DEC /* DecalRenderer.h */,
 			);
 			name = Base;
 			sourceTree = "<group>";
@@ -402,6 +407,7 @@
 				04B9050D2847EC0D00FF56D3 /* stb_image.cpp in Sources */,
 				04B904DA2847E2BB00FF56D3 /* Transform.cpp in Sources */,
 				04B904C72847E25400FF56D3 /* GLTFLoader.cpp in Sources */,
+				041C94A828983DDC00781DEC /* DecalRenderer.cpp in Sources */,
 				04B9052F2847F04E00FF56D3 /* imgui_widgets.cpp in Sources */,
 				041C94A528946B0900781DEC /* Wall.cpp in Sources */,
 				04B904BF2847E22700FF56D3 /* AnimatedMesh.cpp in Sources */,
