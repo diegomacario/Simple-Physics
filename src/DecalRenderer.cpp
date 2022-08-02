@@ -6,6 +6,10 @@
 
 #include <iostream>
 
+#include "ResourceManager.h"
+#include "ShaderLoader.h"
+#include "GLTFLoader.h"
+#include "Transform.h"
 #include "DecalRenderer.h"
 
 DecalRenderer::DecalRenderer()
@@ -13,6 +17,11 @@ DecalRenderer::DecalRenderer()
    , mDepthTexture(0)
 {
    configureDepthFBO();
+
+   // Initialize the full screen quad with depth texture shader
+   mFullScreenQuadWithDepthTextureShader = ResourceManager<Shader>().loadUnmanagedResource<ShaderLoader>("resources/shaders/full_screen_quad_with_depth_texture_shader.vert", "resources/shaders/full_screen_quad_with_depth_texture_shader.frag");
+
+   loadQuad();
 }
 
 DecalRenderer::~DecalRenderer()
@@ -31,18 +40,30 @@ void DecalRenderer::unbindDepthFBO()
    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void DecalRenderer::render(const glm::mat4& projectionView, const glm::vec3& cameraPosition)
+void DecalRenderer::renderDepthTextureToFullScreenQuad()
 {
+   mFullScreenQuadWithDepthTextureShader->use(true);
+   // We need to scale up the quad by 2 because it spans from -0.5 to 0.5, and we need it to span from -1.0 to 1.0 (NDC)
+   Transform modelTransform(glm::vec3(0.0f, 0.0f, 0.0f), Q::quat(), glm::vec3(2.0f, 2.0f, 1.0f));
+   mFullScreenQuadWithDepthTextureShader->setUniformMat4("model", transformToMat4(modelTransform));
    glActiveTexture(GL_TEXTURE0);
    glBindTexture(GL_TEXTURE_2D, mDepthTexture);
-   //mShader->setUniformInt("depthMap", 0);
+   mFullScreenQuadWithDepthTextureShader->setUniformInt("depthTex", 0);
+   mFullScreenQuadWithDepthTextureShader->setUniformFloat("width", 1280.0f * 2.0f);
+   mFullScreenQuadWithDepthTextureShader->setUniformFloat("height", 720.0f * 2.0f);
 
-   // Render
-   // ...
+   // Loop over the quad meshes and render each one
+   for (unsigned int i = 0,
+        size = static_cast<unsigned int>(mQuadMeshes.size());
+        i < size;
+        ++i)
+   {
+      mQuadMeshes[i].Render();
+   }
 
-   // Unbind textures
    glActiveTexture(GL_TEXTURE0);
    glBindTexture(GL_TEXTURE_2D, 0);
+   mFullScreenQuadWithDepthTextureShader->use(false);
 }
 
 void DecalRenderer::configureDepthFBO()
@@ -72,4 +93,25 @@ unsigned int DecalRenderer::createDepthTextureAttachment(int width, int height)
    glBindTexture(GL_TEXTURE_2D, 0);
    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthTexture, 0);
    return depthTexture;
+}
+
+void DecalRenderer::loadQuad()
+{
+   cgltf_data* data = LoadGLTFFile("resources/models/plane/plane.glb");
+   mQuadMeshes = LoadStaticMeshes(data);
+   FreeGLTFFile(data);
+
+   int positionsAttribLoc = mFullScreenQuadWithDepthTextureShader->getAttributeLocation("position");
+   int normalsAttribLoc   = mFullScreenQuadWithDepthTextureShader->getAttributeLocation("normal");
+   int texCoordsAttribLoc = mFullScreenQuadWithDepthTextureShader->getAttributeLocation("texCoord");
+
+   for (unsigned int i = 0,
+        size = static_cast<unsigned int>(mQuadMeshes.size());
+        i < size;
+        ++i)
+   {
+      mQuadMeshes[i].ConfigureVAO(positionsAttribLoc,
+                                  normalsAttribLoc,
+                                  texCoordsAttribLoc);
+   }
 }

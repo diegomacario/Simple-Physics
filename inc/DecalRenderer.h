@@ -1,7 +1,8 @@
 #ifndef DECAL_RENDERER_H
 #define DECAL_RENDERER_H
 
-#include <glm/glm.hpp>
+#include "Shader.h"
+#include "AnimatedMesh.h"
 
 class DecalRenderer
 {
@@ -16,18 +17,24 @@ public:
    DecalRenderer(DecalRenderer&& rhs) = delete;
    DecalRenderer& operator=(DecalRenderer&& rhs) = delete;
 
-   void bindDepthFBO();
-   void unbindDepthFBO();
-   void render(const glm::mat4& projectionView, const glm::vec3& cameraPosition);
+   void         bindDepthFBO();
+   void         unbindDepthFBO();
+   void         renderDepthTextureToFullScreenQuad();
 
-//private:
+private:
 
-   void configureDepthFBO();
+   void         configureDepthFBO();
 
    unsigned int createDepthTextureAttachment(int width, int height);
 
-   unsigned int mDepthFBO;
-   unsigned int mDepthTexture;
+   void         loadQuad();
+
+   unsigned int              mDepthFBO;
+   unsigned int              mDepthTexture;
+
+   std::shared_ptr<Shader>   mFullScreenQuadWithDepthTextureShader;
+
+   std::vector<AnimatedMesh> mQuadMeshes;
 };
 
 #endif

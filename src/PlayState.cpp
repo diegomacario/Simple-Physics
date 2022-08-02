@@ -105,6 +105,14 @@ void PlayState::render()
 
    userInterface();
 
+   // Render the walls into the depth texture
+   mDecalRenderer.bindDepthFBO();
+   glViewport(0, 0, 1280 * 2, 720 * 2);
+   glClear(GL_DEPTH_BUFFER_BIT);
+   renderWalls();
+   mDecalRenderer.unbindDepthFBO();
+   mWindow->setViewport();
+
 #ifndef __EMSCRIPTEN__
    mWindow->bindMultisampleFramebuffer();
 #endif
@@ -114,8 +122,9 @@ void PlayState::render()
    glEnable(GL_DEPTH_TEST);
    glClear(GL_DEPTH_BUFFER_BIT);
 
-   renderRigidBodies();
-   renderWalls();
+   //renderRigidBodies();
+   //renderWalls();
+   mDecalRenderer.renderDepthTextureToFullScreenQuad();
 
    ImGui::Render();
    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
