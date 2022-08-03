@@ -124,9 +124,11 @@ void PlayState::render()
    glClear(GL_DEPTH_BUFFER_BIT);
 
    renderWalls();
-   renderRigidBodies();
    //mDecalRenderer->renderDepthTextureToFullScreenQuad();
+   glDisable(GL_DEPTH_TEST);
    mDecalRenderer->renderDecals(mCamera3.getViewMatrix(), mCamera3.getPerspectiveProjectionMatrix());
+   glEnable(GL_DEPTH_TEST);
+   renderRigidBodies();
 
    ImGui::Render();
    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
