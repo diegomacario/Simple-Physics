@@ -23,6 +23,10 @@ PlayState::PlayState(const std::shared_ptr<FiniteStateMachine>& finiteStateMachi
    mDiffuseShader = ResourceManager<Shader>().loadUnmanagedResource<ShaderLoader>("resources/shaders/diffuse.vert",
                                                                                   "resources/shaders/diffuse.frag");
 
+   // Initialize the normal and depth shader
+   mNormalAndDepthShader = ResourceManager<Shader>().loadUnmanagedResource<ShaderLoader>("resources/shaders/normal_and_depth.vert",
+                                                                                         "resources/shaders/normal_and_depth.frag");
+
    loadModels();
 
    mWindow->setDecalRenderer(mDecalRenderer);
@@ -108,11 +112,11 @@ void PlayState::render()
 
    userInterface();
 
-   // Render the walls and rigid bodies into the depth texture
-   mDecalRenderer->bindDepthFBO();
-   glClear(GL_DEPTH_BUFFER_BIT);
-   renderWalls();
-   mDecalRenderer->unbindDepthFBO();
+   // Render the walls into the depth texture
+   mDecalRenderer->bindDecalFBO();
+   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+   renderNormalsAndDepth();
+   mDecalRenderer->unbindDecalFBO();
 
 #ifndef __EMSCRIPTEN__
    mWindow->bindMultisampleFramebuffer();
@@ -124,6 +128,7 @@ void PlayState::render()
    glClear(GL_DEPTH_BUFFER_BIT);
 
    renderWalls();
+   //mDecalRenderer->renderNormalTextureToFullScreenQuad();
    //mDecalRenderer->renderDepthTextureToFullScreenQuad();
    glDisable(GL_DEPTH_TEST);
    mDecalRenderer->renderDecals(mCamera3.getViewMatrix(), mCamera3.getPerspectiveProjectionMatrix());
@@ -164,6 +169,11 @@ void PlayState::loadModels()
    mPlaneMeshes = LoadStaticMeshes(data);
    FreeGLTFFile(data);
 
+   // Load the normal plane
+   data = LoadGLTFFile("resources/models/plane/plane.glb");
+   mNormalPlaneMeshes = LoadStaticMeshes(data);
+   FreeGLTFFile(data);
+
    int positionsAttribLoc = mDiffuseShader->getAttributeLocation("position");
    int normalsAttribLoc   = mDiffuseShader->getAttributeLocation("normal");
    int texCoordsAttribLoc = mDiffuseShader->getAttributeLocation("texCoord");
@@ -186,6 +196,20 @@ void PlayState::loadModels()
       mPlaneMeshes[i].ConfigureVAO(positionsAttribLoc,
                                    normalsAttribLoc,
                                    texCoordsAttribLoc);
+   }
+
+   positionsAttribLoc = mNormalAndDepthShader->getAttributeLocation("position");
+   normalsAttribLoc   = mNormalAndDepthShader->getAttributeLocation("normal");
+   texCoordsAttribLoc = mNormalAndDepthShader->getAttributeLocation("texCoord");
+
+   for (unsigned int i = 0,
+        size = static_cast<unsigned int>(mNormalPlaneMeshes.size());
+        i < size;
+        ++i)
+   {
+      mNormalPlaneMeshes[i].ConfigureVAO(positionsAttribLoc,
+                                         normalsAttribLoc,
+                                         texCoordsAttribLoc);
    }
 }
 
@@ -276,4 +300,30 @@ void PlayState::renderWalls()
 
    mPlaneTexture->unbind(0);
    mDiffuseShader->use(false);
+}
+
+void PlayState::renderNormalsAndDepth()
+{
+   mNormalAndDepthShader->use(true);
+   mNormalAndDepthShader->setUniformMat4("view",       mCamera3.getViewMatrix());
+   mNormalAndDepthShader->setUniformMat4("projection", mCamera3.getPerspectiveProjectionMatrix());
+
+   // Loop over the walls and render each one
+   const std::vector<Wall>& walls = mWorld.getWalls();
+   for (const Wall& wall : walls)
+   {
+      mNormalAndDepthShader->setUniformMat4("model", wall.getModelMatrix());
+      mNormalAndDepthShader->setUniformMat3("normalMat", wall.getNormalMatrix());
+
+      // Loop over the normal plane meshes and render each one
+      for (unsigned int i = 0,
+           size = static_cast<unsigned int>(mNormalPlaneMeshes.size());
+           i < size;
+           ++i)
+      {
+         mNormalPlaneMeshes[i].Render();
+      }
+   }
+
+   mNormalAndDepthShader->use(false);
 }

@@ -16,13 +16,17 @@
 DecalRenderer::DecalRenderer(unsigned int widthOfFramebuffer, unsigned int heightOfFramebuffer)
    : mWidthOfFramebuffer(widthOfFramebuffer)
    , mHeightOfFramebuffer(heightOfFramebuffer)
-   , mDepthFBO(0)
+   , mDecalFBO(0)
+   , mNormalTexture(0)
    , mDepthTexture(0)
 {
-   configureDepthFBO();
+   configureDecalFBO();
 
    // Initialize the full screen quad with depth texture shader
    mFullScreenQuadWithDepthTextureShader = ResourceManager<Shader>().loadUnmanagedResource<ShaderLoader>("resources/shaders/full_screen_quad_with_depth_texture_shader.vert", "resources/shaders/full_screen_quad_with_depth_texture_shader.frag");
+
+   // Initialize the full screen quad with normal texture shader
+   mFullScreenQuadWithNormalTextureShader = ResourceManager<Shader>().loadUnmanagedResource<ShaderLoader>("resources/shaders/full_screen_quad_with_normal_texture_shader.vert", "resources/shaders/full_screen_quad_with_normal_texture_shader.frag");
 
    // Initialize the decal shader
    mDecalShader = ResourceManager<Shader>().loadUnmanagedResource<ShaderLoader>("resources/shaders/decal.vert", "resources/shaders/decal.frag");
@@ -36,16 +40,17 @@ DecalRenderer::DecalRenderer(unsigned int widthOfFramebuffer, unsigned int heigh
 
 DecalRenderer::~DecalRenderer()
 {
-   glDeleteFramebuffers(1, &mDepthFBO);
+   glDeleteFramebuffers(1, &mDecalFBO);
+   glDeleteTextures(1, &mNormalTexture);
    glDeleteTextures(1, &mDepthTexture);
 }
 
-void DecalRenderer::bindDepthFBO()
+void DecalRenderer::bindDecalFBO()
 {
-   glBindFramebuffer(GL_FRAMEBUFFER, mDepthFBO);
+   glBindFramebuffer(GL_FRAMEBUFFER, mDecalFBO);
 }
 
-void DecalRenderer::unbindDepthFBO()
+void DecalRenderer::unbindDecalFBO()
 {
    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
@@ -114,6 +119,32 @@ void DecalRenderer::renderDecals(const glm::mat4& viewMatrix, const glm::mat4& p
    mDecalShader->use(false);
 }
 
+void DecalRenderer::renderNormalTextureToFullScreenQuad()
+{
+   mFullScreenQuadWithNormalTextureShader->use(true);
+   // We need to scale up the quad by 2 because it spans from -0.5 to 0.5, and we need it to span from -1.0 to 1.0 (NDC)
+   Transform modelTransform(glm::vec3(0.0f, 0.0f, 0.0f), Q::quat(), glm::vec3(2.0f, 2.0f, 1.0f));
+   mFullScreenQuadWithNormalTextureShader->setUniformMat4("model", transformToMat4(modelTransform));
+   glActiveTexture(GL_TEXTURE0);
+   glBindTexture(GL_TEXTURE_2D, mNormalTexture);
+   mFullScreenQuadWithNormalTextureShader->setUniformInt("normalTex", 0);
+   mFullScreenQuadWithNormalTextureShader->setUniformFloat("width", mWidthOfFramebuffer);
+   mFullScreenQuadWithNormalTextureShader->setUniformFloat("height", mHeightOfFramebuffer);
+
+   // Loop over the quad meshes and render each one
+   for (unsigned int i = 0,
+        size = static_cast<unsigned int>(mQuadMeshes.size());
+        i < size;
+        ++i)
+   {
+      mQuadMeshes[i].Render();
+   }
+
+   glActiveTexture(GL_TEXTURE0);
+   glBindTexture(GL_TEXTURE_2D, 0);
+   mFullScreenQuadWithNormalTextureShader->use(false);
+}
+
 void DecalRenderer::renderDepthTextureToFullScreenQuad()
 {
    mFullScreenQuadWithDepthTextureShader->use(true);
@@ -140,8 +171,12 @@ void DecalRenderer::renderDepthTextureToFullScreenQuad()
    mFullScreenQuadWithDepthTextureShader->use(false);
 }
 
-void DecalRenderer::resizeDepthTexture(unsigned int widthOfFramebuffer, unsigned int heightOfFramebuffer)
+void DecalRenderer::resizeTextures(unsigned int widthOfFramebuffer, unsigned int heightOfFramebuffer)
 {
+   glBindTexture(GL_TEXTURE_2D, mNormalTexture);
+   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, widthOfFramebuffer, heightOfFramebuffer, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+   glBindTexture(GL_TEXTURE_2D, 0);
+
    glBindTexture(GL_TEXTURE_2D, mDepthTexture);
    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, widthOfFramebuffer, heightOfFramebuffer, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
    glBindTexture(GL_TEXTURE_2D, 0);
@@ -150,19 +185,34 @@ void DecalRenderer::resizeDepthTexture(unsigned int widthOfFramebuffer, unsigned
    mHeightOfFramebuffer = heightOfFramebuffer;
 }
 
-void DecalRenderer::configureDepthFBO()
+void DecalRenderer::configureDecalFBO()
 {
-   glGenFramebuffers(1, &mDepthFBO);
-   glBindFramebuffer(GL_FRAMEBUFFER, mDepthFBO);
+   glGenFramebuffers(1, &mDecalFBO);
+   glBindFramebuffer(GL_FRAMEBUFFER, mDecalFBO);
 
+   mNormalTexture = createColorTextureAttachment();
    mDepthTexture = createDepthTextureAttachment();
 
    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
    {
-      std::cout << "Error - DecalRenderer::ConfigureDepthFBO - Depth framebuffer is not complete" << "\n";
+      std::cout << "Error - DecalRenderer::configureDecalFBO - Decal framebuffer is not complete" << "\n";
    }
 
    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+unsigned int DecalRenderer::createColorTextureAttachment()
+{
+   // Create a texture and use it as a color attachment
+   unsigned int colorTexture;
+   glGenTextures(1, &colorTexture);
+   glBindTexture(GL_TEXTURE_2D, colorTexture);
+   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, mWidthOfFramebuffer, mHeightOfFramebuffer, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+   glBindTexture(GL_TEXTURE_2D, 0);
+   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorTexture, 0);
+   return colorTexture;
 }
 
 unsigned int DecalRenderer::createDepthTextureAttachment()

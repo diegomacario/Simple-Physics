@@ -20,7 +20,8 @@ public:
         float height);
    ~Wall() = default;
 
-   glm::mat4 getModelMatrix() const;
+   glm::mat4 getModelMatrix() const { return mModelMatrix; }
+   glm::mat3 getNormalMatrix() const { return mNormalMatrix; }
    glm::vec3 getNormal() const { return mNormal; }
    float     getD() const { return mD; }
 
@@ -32,6 +33,8 @@ private:
    float     mHeight;
    glm::vec3 mNormal;
    float     mD;
+   glm::mat4 mModelMatrix;
+   glm::mat3 mNormalMatrix;
 };
 
 #endif

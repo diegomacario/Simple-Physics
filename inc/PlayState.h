@@ -45,6 +45,7 @@ private:
 
    void renderRigidBodies();
    void renderWalls();
+   void renderNormalsAndDepth();
 
    std::shared_ptr<FiniteStateMachine>    mFSM;
 
@@ -53,11 +54,13 @@ private:
    Camera3                                mCamera3;
 
    std::shared_ptr<Shader>                mDiffuseShader;
+   std::shared_ptr<Shader>                mNormalAndDepthShader;
 
    std::vector<AnimatedMesh>              mCubeMeshes;
    std::shared_ptr<Texture>               mCubeTexture;
    std::vector<AnimatedMesh>              mPlaneMeshes;
    std::shared_ptr<Texture>               mPlaneTexture;
+   std::vector<AnimatedMesh>              mNormalPlaneMeshes;
 
    World                                  mWorld;
 

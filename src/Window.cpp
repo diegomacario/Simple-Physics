@@ -637,6 +637,6 @@ void Window::updateBufferAndViewportSizes(int widthOfFramebufferInPix, int heigh
 
    if (mDecalRenderer)
    {
-      mDecalRenderer->resizeDepthTexture(mWidthOfFramebufferInPix, mHeightOfFramebufferInPix);
+      mDecalRenderer->resizeTextures(mWidthOfFramebufferInPix, mHeightOfFramebufferInPix);
    }
 }

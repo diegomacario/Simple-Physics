@@ -18,16 +18,18 @@ public:
    DecalRenderer(DecalRenderer&& rhs) = delete;
    DecalRenderer& operator=(DecalRenderer&& rhs) = delete;
 
-   void         bindDepthFBO();
-   void         unbindDepthFBO();
+   void         bindDecalFBO();
+   void         unbindDecalFBO();
    void         renderDecals(const glm::mat4& viewMatrix, const glm::mat4& perspectiveProjectionMatrix);
+   void         renderNormalTextureToFullScreenQuad();
    void         renderDepthTextureToFullScreenQuad();
-   void         resizeDepthTexture(unsigned int widthOfFramebuffer, unsigned int heightOfFramebuffer);
+   void         resizeTextures(unsigned int widthOfFramebuffer, unsigned int heightOfFramebuffer);
 
 private:
 
-   void         configureDepthFBO();
+   void         configureDecalFBO();
 
+   unsigned int createColorTextureAttachment();
    unsigned int createDepthTextureAttachment();
 
    void         loadQuad();
@@ -35,9 +37,11 @@ private:
 
    unsigned int              mWidthOfFramebuffer;
    unsigned int              mHeightOfFramebuffer;
-   unsigned int              mDepthFBO;
+   unsigned int              mDecalFBO;
+   unsigned int              mNormalTexture;
    unsigned int              mDepthTexture;
 
+   std::shared_ptr<Shader>   mFullScreenQuadWithNormalTextureShader;
    std::shared_ptr<Shader>   mFullScreenQuadWithDepthTextureShader;
    std::shared_ptr<Shader>   mDecalShader;
 
