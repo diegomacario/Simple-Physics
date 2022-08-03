@@ -3,6 +3,8 @@ in vec4 clipSpacePos;
 uniform mat4 inverseModel;
 uniform mat4 inverseView;
 uniform mat4 inverseProjection;
+uniform float width;
+uniform float height;
 uniform sampler2D depthTex;
 uniform sampler2D decalTex;
 
@@ -13,8 +15,7 @@ void main()
 {
    vec3 ndcPos = clipSpacePos.xyz / clipSpacePos.w;
 
-   // + 0.5 / resolution.xy is not necessary if texture filter is GL_NEAREST
-   vec2 uv = ndcPos.xy * 0.5 + 0.5;
+   vec2 uv = gl_FragCoord.xy / vec2(width, height);
 
    float depth = texture(depthTex, uv).r;
 

@@ -106,7 +106,7 @@ void PlayState::render()
    ImGui_ImplGlfw_NewFrame();
    ImGui::NewFrame();
 
-   //userInterface();
+   userInterface();
 
    // Render the walls and rigid bodies into the depth texture
    mDecalRenderer->bindDepthFBO();
@@ -124,7 +124,7 @@ void PlayState::render()
    glClear(GL_DEPTH_BUFFER_BIT);
 
    renderWalls();
-   //renderRigidBodies();
+   renderRigidBodies();
    //mDecalRenderer->renderDepthTextureToFullScreenQuad();
    mDecalRenderer->renderDecals(mCamera3.getViewMatrix(), mCamera3.getPerspectiveProjectionMatrix());
 
