@@ -67,15 +67,22 @@ void DecalRenderer::renderDecals(const glm::mat4& viewMatrix, const glm::mat4& p
    mDecalShader->setUniformFloat("height", mHeightOfFramebuffer);
 
    glActiveTexture(GL_TEXTURE0);
-   glBindTexture(GL_TEXTURE_2D, mDepthTexture);
-   mDecalShader->setUniformInt("depthTex", 0);
+   glBindTexture(GL_TEXTURE_2D, mNormalTexture);
+   mDecalShader->setUniformInt("normalTex", 0);
 
-   mDecalTexture->bind(1, mDecalShader->getUniformLocation("decalTex"));
+   glActiveTexture(GL_TEXTURE1);
+   glBindTexture(GL_TEXTURE_2D, mDepthTexture);
+   mDecalShader->setUniformInt("depthTex", 1);
+
+   mDecalTexture->bind(2, mDecalShader->getUniformLocation("decalTex"));
+
+   mDecalShader->setUniformFloat("normalThreshold", glm::cos(glm::radians(60.0f)));
 
    // Decal 1
-   Transform modelTransform(glm::vec3(0.75, -2.5f * 0.5f, -2.5f * 0.5f), Q::lookRotation(glm::vec3(0.0f, 1.0f, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f)), glm::vec3(0.8f, 0.8f, 0.8f));
+   Transform modelTransform(glm::vec3(2.5f * 0.5f, -2.5f * 0.5f, -2.5f * 0.5f), Q::quat(), glm::vec3(1.0f, 1.0f, 1.0f));
    mDecalShader->setUniformMat4("model", transformToMat4(modelTransform));
    mDecalShader->setUniformMat4("inverseModel", glm::inverse(transformToMat4(modelTransform)));
+   mDecalShader->setUniformVec3("decalNormal", glm::vec3(0.0f, 0.0f, 1.0f));
    // Loop over the cube meshes and render each one
    for (unsigned int i = 0,
         size = static_cast<unsigned int>(mCubeMeshes.size());
@@ -86,9 +93,10 @@ void DecalRenderer::renderDecals(const glm::mat4& viewMatrix, const glm::mat4& p
    }
 
    // Decal 2
-   modelTransform = Transform(glm::vec3(-2.5f * 0.5f, -2.5f * 0.5f, -2.5f * 0.5f), Q::lookRotation(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f)), glm::vec3(1.0f, 1.0f, 1.0f));
+   modelTransform = Transform(glm::vec3(-2.5f * 0.5f, -2.5f * 0.5f, 0.0f), Q::angleAxis(glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f)), glm::vec3(1.0f, 1.0f, 1.0f));
    mDecalShader->setUniformMat4("model", transformToMat4(modelTransform));
    mDecalShader->setUniformMat4("inverseModel", glm::inverse(transformToMat4(modelTransform)));
+   mDecalShader->setUniformVec3("decalNormal", glm::vec3(1.0f, 0.0f, 0.0f));
    // Loop over the cube meshes and render each one
    for (unsigned int i = 0,
         size = static_cast<unsigned int>(mCubeMeshes.size());
@@ -99,9 +107,10 @@ void DecalRenderer::renderDecals(const glm::mat4& viewMatrix, const glm::mat4& p
    }
 
    // Decal 3
-   modelTransform = Transform(glm::vec3(-0.25f, 0.5f, -2.5f * 0.5f), Q::quat(), glm::vec3(1.0f, 1.0f, 1.0f));
+   modelTransform = Transform(glm::vec3(0.0f, -2.5f * 0.5f, 2.5f * 0.5f), Q::angleAxis(glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f)), glm::vec3(1.0f, 1.0f, 1.0f));
    mDecalShader->setUniformMat4("model", transformToMat4(modelTransform));
    mDecalShader->setUniformMat4("inverseModel", glm::inverse(transformToMat4(modelTransform)));
+   mDecalShader->setUniformVec3("decalNormal", glm::vec3(0.0f, 0.0f, -1.0f));
    // Loop over the cube meshes and render each one
    for (unsigned int i = 0,
         size = static_cast<unsigned int>(mCubeMeshes.size());
@@ -111,10 +120,55 @@ void DecalRenderer::renderDecals(const glm::mat4& viewMatrix, const glm::mat4& p
       mCubeMeshes[i].Render();
    }
 
+   // Decal 4
+   modelTransform = Transform(glm::vec3(2.5f * 0.5f, 2.5f * 0.5f, 0.0f), Q::angleAxis(glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f)), glm::vec3(1.0f, 1.0f, 1.0f));
+   mDecalShader->setUniformMat4("model", transformToMat4(modelTransform));
+   mDecalShader->setUniformMat4("inverseModel", glm::inverse(transformToMat4(modelTransform)));
+   mDecalShader->setUniformVec3("decalNormal", glm::vec3(-1.0f, 0.0f, 0.0f));
+   // Loop over the cube meshes and render each one
+   for (unsigned int i = 0,
+        size = static_cast<unsigned int>(mCubeMeshes.size());
+        i < size;
+        ++i)
+   {
+      mCubeMeshes[i].Render();
+   }
+
+   // Decal 5
+   modelTransform = Transform(glm::vec3(-2.5f * 0.5f, 2.5f * 0.5f, 0.0f), Q::angleAxis(glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f)), glm::vec3(1.0f, 1.0f, 1.0f));
+   mDecalShader->setUniformMat4("model", transformToMat4(modelTransform));
+   mDecalShader->setUniformMat4("inverseModel", glm::inverse(transformToMat4(modelTransform)));
+   mDecalShader->setUniformVec3("decalNormal", glm::vec3(0.0f, -1.0f, 0.0f));
+   // Loop over the cube meshes and render each one
+   for (unsigned int i = 0,
+        size = static_cast<unsigned int>(mCubeMeshes.size());
+        i < size;
+        ++i)
+   {
+      mCubeMeshes[i].Render();
+   }
+
+   // Decal 6
+   modelTransform = Transform(glm::vec3(-2.5f * 0.5f, -2.5f * 0.5f, -2.5f * 0.5f), Q::angleAxis(glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)), glm::vec3(1.0f, 1.0f, 1.0f));
+   mDecalShader->setUniformMat4("model", transformToMat4(modelTransform));
+   mDecalShader->setUniformMat4("inverseModel", glm::inverse(transformToMat4(modelTransform)));
+   mDecalShader->setUniformVec3("decalNormal", glm::vec3(0.0f, 1.0f, 0.0f));
+   // Loop over the cube meshes and render each one
+   for (unsigned int i = 0,
+        size = static_cast<unsigned int>(mCubeMeshes.size());
+        i < size;
+        ++i)
+   {
+      mCubeMeshes[i].Render();
+   }
+
+   glActiveTexture(GL_TEXTURE1);
+   glBindTexture(GL_TEXTURE_2D, 0);
+
    glActiveTexture(GL_TEXTURE0);
    glBindTexture(GL_TEXTURE_2D, 0);
 
-   mDecalTexture->unbind(1);
+   mDecalTexture->unbind(2);
 
    mDecalShader->use(false);
 }

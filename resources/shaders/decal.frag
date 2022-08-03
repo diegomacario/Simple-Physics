@@ -5,8 +5,11 @@ uniform mat4 inverseView;
 uniform mat4 inverseProjection;
 uniform float width;
 uniform float height;
+uniform sampler2D normalTex;
 uniform sampler2D depthTex;
 uniform sampler2D decalTex;
+uniform vec3 decalNormal;
+uniform float normalThreshold;
 
 out vec4 fragColor;
 
@@ -35,8 +38,18 @@ void main()
    }
    else
    {
-      // Negate Y to flip the texture vertically
-      vec2 uv   = vec2(objectSpacePos.x, -objectSpacePos.y) + 0.5f;
-      fragColor = texture(decalTex, uv);
+      vec3 norm = vec3(texture(normalTex, uv));
+      vec3 adjustedNorm = (norm * 2.0) - vec3(1.0, 1.0, 1.0);
+      if (dot(decalNormal, adjustedNorm) < normalThreshold)
+      {
+         //fragColor = vec4(0.0, 1.0, 0.0, 1.0);
+         discard;
+      }
+      else
+      {
+         // Negate Y to flip the texture vertically
+         vec2 uv   = vec2(objectSpacePos.x, -objectSpacePos.y) + 0.5f;
+         fragColor = texture(decalTex, uv);
+      }
    }
 }
