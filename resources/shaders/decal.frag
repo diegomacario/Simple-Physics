@@ -1,5 +1,3 @@
-in vec4 clipPos;
-
 uniform float width;
 uniform float height;
 uniform sampler2D depthTex;
@@ -27,8 +25,6 @@ vec4 getWorldPosFromDepth(float depth, vec2 uv)
 
 void main()
 {
-   vec2 screenPosition = clipPos.xy / clipPos.w;
-
    vec2 uv = gl_FragCoord.xy / vec2(width, height);
    float depth = texture(depthTex, uv).r;
 

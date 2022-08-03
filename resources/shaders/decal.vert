@@ -8,7 +8,6 @@ uniform mat4 projection;
 
 out vec3 norm;
 out vec2 uv;
-out vec4 clipPos;
 
 void main()
 {
@@ -17,5 +16,4 @@ void main()
    // TODO: To support non-uniform scaling we will need to change the way we transform the normals
    norm        = normalize(vec3(model * vec4(normal, 0.0f)));
    uv          = texCoord;
-   clipPos     = projection * view * model * vec4(position, 1.0f);
 }
