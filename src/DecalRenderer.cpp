@@ -78,18 +78,23 @@ void DecalRenderer::renderDecals(const glm::mat4& viewMatrix, const glm::mat4& p
 
    mDecalShader->setUniformFloat("normalThreshold", glm::cos(glm::radians(60.0f)));
 
-   // Decal 1
-   Transform modelTransform(glm::vec3(0.0f, -2.5f * 0.5f, -2.5f * 0.5f), Q::angleAxis(glm::radians(-45.0f), glm::vec3(1.0f, 0.0f, 0.0f)), glm::vec3(1.0f, 1.0f, 1.0f));
-   mDecalShader->setUniformMat4("model", transformToMat4(modelTransform));
-   mDecalShader->setUniformMat4("inverseModel", glm::inverse(transformToMat4(modelTransform)));
-   mDecalShader->setUniformVec3("decalNormal", glm::normalize(glm::vec3(0.0f, 1.0f, 1.0f)));
-   // Loop over the cube meshes and render each one
-   for (unsigned int i = 0,
-        size = static_cast<unsigned int>(mCubeMeshes.size());
-        i < size;
-        ++i)
+   for (unsigned int decalIndex = 0,
+        numDecals = static_cast<unsigned int>(mDecalModelMatrices.size());
+        decalIndex < numDecals;
+        ++decalIndex)
    {
-      mCubeMeshes[i].Render();
+      mDecalShader->setUniformMat4("model", mDecalModelMatrices[decalIndex]);
+      mDecalShader->setUniformMat4("inverseModel", mDecalInverseModelMatrices[decalIndex]);
+      mDecalShader->setUniformVec3("decalNormal", mDecalNormals[decalIndex]);
+
+      // Loop over the cube meshes and render each one
+      for (unsigned int meshIndex = 0,
+           numMeshes = static_cast<unsigned int>(mCubeMeshes.size());
+           meshIndex < numMeshes;
+           ++meshIndex)
+      {
+         mCubeMeshes[meshIndex].Render();
+      }
    }
 
    glActiveTexture(GL_TEXTURE1);
@@ -167,6 +172,15 @@ void DecalRenderer::resizeTextures(unsigned int widthOfFramebuffer, unsigned int
 
    mWidthOfFramebuffer  = widthOfFramebuffer;
    mHeightOfFramebuffer = heightOfFramebuffer;
+}
+
+void DecalRenderer::addDecal(const glm::vec3& decalPosition, const glm::vec3& decalNormal)
+{
+   Transform modelTransform(decalPosition, Q::lookRotation(decalNormal, glm::vec3(0.0f, 1.0f, 0.0f)), glm::vec3(1.0f, 1.0f, 1.0f));
+   glm::mat4 decalModelMatrix = transformToMat4(modelTransform);
+   mDecalModelMatrices.push_back(decalModelMatrix);
+   mDecalInverseModelMatrices.push_back(glm::inverse(decalModelMatrix));
+   mDecalNormals.push_back(decalNormal);
 }
 
 void DecalRenderer::configureDecalFBO()

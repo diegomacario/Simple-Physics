@@ -24,6 +24,7 @@ public:
    void         renderNormalTextureToFullScreenQuad();
    void         renderDepthTextureToFullScreenQuad();
    void         resizeTextures(unsigned int widthOfFramebuffer, unsigned int heightOfFramebuffer);
+   void         addDecal(const glm::vec3& decalPosition, const glm::vec3& decalNormal);
 
 private:
 
@@ -49,6 +50,10 @@ private:
    std::vector<AnimatedMesh> mCubeMeshes;
 
    std::shared_ptr<Texture>  mDecalTexture;
+
+   std::vector<glm::mat4>    mDecalModelMatrices;
+   std::vector<glm::mat4>    mDecalInverseModelMatrices;
+   std::vector<glm::vec3>    mDecalNormals;
 };
 
 #endif

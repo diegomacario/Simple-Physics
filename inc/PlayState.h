@@ -8,8 +8,8 @@
 #include "Camera3.h"
 #include "AnimatedMesh.h"
 #include "Texture.h"
-#include "World.h"
 #include "DecalRenderer.h"
+#include "World.h"
 
 class PlayState : public State
 {
@@ -62,9 +62,9 @@ private:
    std::shared_ptr<Texture>               mPlaneTexture;
    std::vector<AnimatedMesh>              mNormalPlaneMeshes;
 
-   World                                  mWorld;
-
    std::shared_ptr<DecalRenderer>         mDecalRenderer;
+
+   World                                  mWorld;
 };
 
 #endif

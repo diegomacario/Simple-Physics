@@ -3,7 +3,14 @@
 #include "Quat.h"
 #include "World.h"
 
-World::World()
+World::World(const std::shared_ptr<DecalRenderer>& decalRenderer)
+   : mRigidBodies()
+   , mWalls()
+   , mCollisionState(CollisionState::clear)
+   , mCollidingRigidBodyIndex(-1)
+   , mCollidingVertexIndex(-1)
+   , mCollisionNormal()
+   , mDecalRenderer(decalRenderer)
 {
    initializeRigidBodies();
    initializeWalls();
@@ -99,6 +106,11 @@ bool World::simulate(float deltaTime)
          } while ((checkForCollisions() == CollisionState::colliding) && (numIterations < 100));
       }
 
+      if (mCollidingRigidBodyIndex != -1 && mCollidingVertexIndex != -1)
+      {
+         mDecalRenderer->addDecal(mRigidBodies[mCollidingRigidBodyIndex].getState(future).verticesInWorldSpace[mCollidingVertexIndex], mCollisionNormal);
+      }
+
       // We made a successful step, so swap configurations to save the data for the next step
       currentTime = targetTime;
       targetTime = deltaTime;
@@ -107,6 +119,9 @@ bool World::simulate(float deltaTime)
       {
          iter->swapStates();
       }
+
+      mCollidingRigidBodyIndex = -1;
+      mCollidingVertexIndex = -1;
    }
 
    return true; // No error

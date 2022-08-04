@@ -5,12 +5,13 @@
 
 #include "RigidBody.h"
 #include "Wall.h"
+#include "DecalRenderer.h"
 
 class World
 {
 public:
 
-   World();
+   World(const std::shared_ptr<DecalRenderer>& decalRenderer);
    ~World() = default;
 
    void                          initializeRigidBodies();
@@ -41,13 +42,15 @@ private:
 
    void                          orthonormalizeOrientation(glm::mat3& orientation);
 
-   std::vector<RigidBody> mRigidBodies;
-   std::vector<Wall>      mWalls;
+   std::vector<RigidBody>         mRigidBodies;
+   std::vector<Wall>              mWalls;
 
-   CollisionState         mCollisionState;
-   int                    mCollidingRigidBodyIndex;
-   int                    mCollidingVertexIndex;
-   glm::vec3              mCollisionNormal;
+   CollisionState                 mCollisionState;
+   int                            mCollidingRigidBodyIndex;
+   int                            mCollidingVertexIndex;
+   glm::vec3                      mCollisionNormal;
+
+   std::shared_ptr<DecalRenderer> mDecalRenderer;
 };
 
 #endif
