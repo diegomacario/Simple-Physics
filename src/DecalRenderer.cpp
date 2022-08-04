@@ -79,80 +79,10 @@ void DecalRenderer::renderDecals(const glm::mat4& viewMatrix, const glm::mat4& p
    mDecalShader->setUniformFloat("normalThreshold", glm::cos(glm::radians(60.0f)));
 
    // Decal 1
-   Transform modelTransform(glm::vec3(2.5f * 0.5f, -2.5f * 0.5f, -2.5f * 0.5f), Q::quat(), glm::vec3(1.0f, 1.0f, 1.0f));
+   Transform modelTransform(glm::vec3(0.0f, -2.5f * 0.5f, -2.5f * 0.5f), Q::angleAxis(glm::radians(-45.0f), glm::vec3(1.0f, 0.0f, 0.0f)), glm::vec3(1.0f, 1.0f, 1.0f));
    mDecalShader->setUniformMat4("model", transformToMat4(modelTransform));
    mDecalShader->setUniformMat4("inverseModel", glm::inverse(transformToMat4(modelTransform)));
-   mDecalShader->setUniformVec3("decalNormal", glm::vec3(0.0f, 0.0f, 1.0f));
-   // Loop over the cube meshes and render each one
-   for (unsigned int i = 0,
-        size = static_cast<unsigned int>(mCubeMeshes.size());
-        i < size;
-        ++i)
-   {
-      mCubeMeshes[i].Render();
-   }
-
-   // Decal 2
-   modelTransform = Transform(glm::vec3(-2.5f * 0.5f, -2.5f * 0.5f, 0.0f), Q::angleAxis(glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f)), glm::vec3(1.0f, 1.0f, 1.0f));
-   mDecalShader->setUniformMat4("model", transformToMat4(modelTransform));
-   mDecalShader->setUniformMat4("inverseModel", glm::inverse(transformToMat4(modelTransform)));
-   mDecalShader->setUniformVec3("decalNormal", glm::vec3(1.0f, 0.0f, 0.0f));
-   // Loop over the cube meshes and render each one
-   for (unsigned int i = 0,
-        size = static_cast<unsigned int>(mCubeMeshes.size());
-        i < size;
-        ++i)
-   {
-      mCubeMeshes[i].Render();
-   }
-
-   // Decal 3
-   modelTransform = Transform(glm::vec3(0.0f, -2.5f * 0.5f, 2.5f * 0.5f), Q::angleAxis(glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f)), glm::vec3(1.0f, 1.0f, 1.0f));
-   mDecalShader->setUniformMat4("model", transformToMat4(modelTransform));
-   mDecalShader->setUniformMat4("inverseModel", glm::inverse(transformToMat4(modelTransform)));
-   mDecalShader->setUniformVec3("decalNormal", glm::vec3(0.0f, 0.0f, -1.0f));
-   // Loop over the cube meshes and render each one
-   for (unsigned int i = 0,
-        size = static_cast<unsigned int>(mCubeMeshes.size());
-        i < size;
-        ++i)
-   {
-      mCubeMeshes[i].Render();
-   }
-
-   // Decal 4
-   modelTransform = Transform(glm::vec3(2.5f * 0.5f, 2.5f * 0.5f, 0.0f), Q::angleAxis(glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f)), glm::vec3(1.0f, 1.0f, 1.0f));
-   mDecalShader->setUniformMat4("model", transformToMat4(modelTransform));
-   mDecalShader->setUniformMat4("inverseModel", glm::inverse(transformToMat4(modelTransform)));
-   mDecalShader->setUniformVec3("decalNormal", glm::vec3(-1.0f, 0.0f, 0.0f));
-   // Loop over the cube meshes and render each one
-   for (unsigned int i = 0,
-        size = static_cast<unsigned int>(mCubeMeshes.size());
-        i < size;
-        ++i)
-   {
-      mCubeMeshes[i].Render();
-   }
-
-   // Decal 5
-   modelTransform = Transform(glm::vec3(-2.5f * 0.5f, 2.5f * 0.5f, 0.0f), Q::angleAxis(glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f)), glm::vec3(1.0f, 1.0f, 1.0f));
-   mDecalShader->setUniformMat4("model", transformToMat4(modelTransform));
-   mDecalShader->setUniformMat4("inverseModel", glm::inverse(transformToMat4(modelTransform)));
-   mDecalShader->setUniformVec3("decalNormal", glm::vec3(0.0f, -1.0f, 0.0f));
-   // Loop over the cube meshes and render each one
-   for (unsigned int i = 0,
-        size = static_cast<unsigned int>(mCubeMeshes.size());
-        i < size;
-        ++i)
-   {
-      mCubeMeshes[i].Render();
-   }
-
-   // Decal 6
-   modelTransform = Transform(glm::vec3(-2.5f * 0.5f, -2.5f * 0.5f, -2.5f * 0.5f), Q::angleAxis(glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)), glm::vec3(1.0f, 1.0f, 1.0f));
-   mDecalShader->setUniformMat4("model", transformToMat4(modelTransform));
-   mDecalShader->setUniformMat4("inverseModel", glm::inverse(transformToMat4(modelTransform)));
-   mDecalShader->setUniformVec3("decalNormal", glm::vec3(0.0f, 1.0f, 0.0f));
+   mDecalShader->setUniformVec3("decalNormal", glm::normalize(glm::vec3(0.0f, 1.0f, 1.0f)));
    // Loop over the cube meshes and render each one
    for (unsigned int i = 0,
         size = static_cast<unsigned int>(mCubeMeshes.size());
