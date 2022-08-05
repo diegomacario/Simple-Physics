@@ -32,7 +32,7 @@ DecalRenderer::DecalRenderer(unsigned int widthOfFramebuffer, unsigned int heigh
    mDecalShader = ResourceManager<Shader>().loadUnmanagedResource<ShaderLoader>("resources/shaders/decal.vert", "resources/shaders/decal.frag");
 
    // Load the texture of the decal
-   mDecalTexture = ResourceManager<Texture>().loadUnmanagedResource<TextureLoader>("resources/models/decal/decal.png");
+   mDecalTexture = ResourceManager<Texture>().loadUnmanagedResource<TextureLoader>("resources/models/decal/dandy.JPG");
 
    loadQuad();
    loadCube();
@@ -178,7 +178,8 @@ void DecalRenderer::resizeTextures(unsigned int widthOfFramebuffer, unsigned int
 
 void DecalRenderer::addDecal(const glm::vec3& decalPosition, const glm::vec3& decalNormal)
 {
-   Transform modelTransform(decalPosition, Q::lookRotation(decalNormal, glm::vec3(0.0f, 1.0f, 0.0f)), glm::vec3(1.0f, 1.0f, 1.0f));
+   float aspectRatio = 3295.0f / 2243.0f;
+   Transform modelTransform(decalPosition, Q::lookRotation(decalNormal, glm::vec3(0.0f, 1.0f, 0.0f)), glm::vec3(1.0f, 1.0f * (1.0f / aspectRatio), 1.0f));
    glm::mat4 decalModelMatrix = transformToMat4(modelTransform);
    mDecalModelMatrices.push_back(decalModelMatrix);
    mDecalInverseModelMatrices.push_back(glm::inverse(decalModelMatrix));
