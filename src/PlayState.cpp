@@ -132,7 +132,7 @@ void PlayState::render()
    {
       renderWalls();
       glDisable(GL_DEPTH_TEST);
-      mDecalRenderer->renderDecals(mCamera3.getViewMatrix(), mCamera3.getPerspectiveProjectionMatrix());
+      mDecalRenderer->renderDecals(mCamera3.getViewMatrix(), mCamera3.getPerspectiveProjectionMatrix(), mDisplayDecalOBBs, mDisplayDiscardedDecalParts);
       glEnable(GL_DEPTH_TEST);
       renderRigidBodies();
    }
@@ -261,6 +261,9 @@ void PlayState::userInterface()
       ImGui::RadioButton("Display final scene", &mDisplayMode, 0);
       ImGui::RadioButton("Display depth texture", &mDisplayMode, 1);
       ImGui::RadioButton("Display normal texture", &mDisplayMode, 2);
+
+      ImGui::Checkbox("Display decal OBBs", &mDisplayDecalOBBs);
+      ImGui::Checkbox("Display discarded decal parts", &mDisplayDiscardedDecalParts);
    }
 
    ImGui::End();

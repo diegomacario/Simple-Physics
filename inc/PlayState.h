@@ -69,6 +69,8 @@ private:
 
    float                                  mSelectedPlaybackSpeed = 1.0f;
    int                                    mDisplayMode = 0;
+   bool                                   mDisplayDecalOBBs;
+   bool                                   mDisplayDiscardedDecalParts;
 };
 
 #endif

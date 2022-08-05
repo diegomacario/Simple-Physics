@@ -55,7 +55,7 @@ void DecalRenderer::unbindDecalFBO()
    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void DecalRenderer::renderDecals(const glm::mat4& viewMatrix, const glm::mat4& perspectiveProjectionMatrix)
+void DecalRenderer::renderDecals(const glm::mat4& viewMatrix, const glm::mat4& perspectiveProjectionMatrix, bool displayDecalOBBs, bool displayDiscardedDecalParts)
 {
    mDecalShader->use(true);
 
@@ -77,6 +77,8 @@ void DecalRenderer::renderDecals(const glm::mat4& viewMatrix, const glm::mat4& p
    mDecalTexture->bind(2, mDecalShader->getUniformLocation("decalTex"));
 
    mDecalShader->setUniformFloat("normalThreshold", glm::cos(glm::radians(60.0f)));
+   mDecalShader->setUniformBool("displayDecalOBBs", displayDecalOBBs);
+   mDecalShader->setUniformBool("displayDiscardedDecalParts", displayDiscardedDecalParts);
 
    for (unsigned int decalIndex = 0,
         numDecals = static_cast<unsigned int>(mDecalModelMatrices.size());

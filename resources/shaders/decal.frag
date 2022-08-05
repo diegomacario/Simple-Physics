@@ -10,6 +10,8 @@ uniform sampler2D depthTex;
 uniform sampler2D decalTex;
 uniform vec3 decalNormal;
 uniform float normalThreshold;
+uniform bool displayDecalOBBs;
+uniform bool displayDiscardedDecalParts;
 
 out vec4 fragColor;
 
@@ -33,8 +35,10 @@ void main()
 
    if (abs(objectSpacePos.x) > 0.5 || abs(objectSpacePos.y) > 0.5 || abs(objectSpacePos.z) > 0.5)
    {
-      //fragColor = vec4(1.0, 0.0, 0.0, 1.0);
-      discard;
+      if (displayDecalOBBs)
+         fragColor = vec4(0.0, 1.0, 0.0, 1.0);
+      else
+         discard;
    }
    else
    {
@@ -42,8 +46,10 @@ void main()
       vec3 adjustedNorm = (norm * 2.0) - vec3(1.0, 1.0, 1.0);
       if (dot(decalNormal, adjustedNorm) - normalThreshold < 0.0)
       {
-         //fragColor = vec4(0.0, 1.0, 0.0, 1.0);
-         discard;
+         if (displayDiscardedDecalParts)
+            fragColor = vec4(1.0, 0.0, 0.0, 1.0);
+         else
+            discard;
       }
       else
       {

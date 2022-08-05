@@ -20,7 +20,7 @@ public:
 
    void         bindDecalFBO();
    void         unbindDecalFBO();
-   void         renderDecals(const glm::mat4& viewMatrix, const glm::mat4& perspectiveProjectionMatrix);
+   void         renderDecals(const glm::mat4& viewMatrix, const glm::mat4& perspectiveProjectionMatrix, bool displayDecalOBBs, bool displayDiscardedDecalParts);
    void         renderNormalTextureToFullScreenQuad();
    void         renderDepthTextureToFullScreenQuad();
    void         resizeTextures(unsigned int widthOfFramebuffer, unsigned int heightOfFramebuffer);
