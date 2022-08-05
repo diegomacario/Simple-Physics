@@ -102,7 +102,7 @@ void PlayState::processInput()
 void PlayState::update(float deltaTime)
 {
    // TODO: Handle simulation errors
-   mWorld.simulate(deltaTime);
+   mWorld.simulate(deltaTime * mSelectedPlaybackSpeed);
 }
 
 void PlayState::render()
@@ -113,7 +113,7 @@ void PlayState::render()
 
    userInterface();
 
-   // Render the walls into the depth texture
+   // Render the depth and normal textures
    mDecalRenderer->bindDecalFBO();
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
    renderNormalsAndDepth();
@@ -128,13 +128,22 @@ void PlayState::render()
    glEnable(GL_DEPTH_TEST);
    glClear(GL_DEPTH_BUFFER_BIT);
 
-   renderWalls();
-   //mDecalRenderer->renderNormalTextureToFullScreenQuad();
-   //mDecalRenderer->renderDepthTextureToFullScreenQuad();
-   glDisable(GL_DEPTH_TEST);
-   mDecalRenderer->renderDecals(mCamera3.getViewMatrix(), mCamera3.getPerspectiveProjectionMatrix());
-   glEnable(GL_DEPTH_TEST);
-   renderRigidBodies();
+   if (mDisplayMode == 0) // Final
+   {
+      renderWalls();
+      glDisable(GL_DEPTH_TEST);
+      mDecalRenderer->renderDecals(mCamera3.getViewMatrix(), mCamera3.getPerspectiveProjectionMatrix());
+      glEnable(GL_DEPTH_TEST);
+      renderRigidBodies();
+   }
+   else if (mDisplayMode == 1) // Depth
+   {
+      mDecalRenderer->renderDepthTextureToFullScreenQuad();
+   }
+   else if (mDisplayMode == 2) // Normal
+   {
+      mDecalRenderer->renderNormalTextureToFullScreenQuad();
+   }
 
    ImGui::Render();
    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -168,6 +177,11 @@ void PlayState::loadModels()
    // Load the plane
    data = LoadGLTFFile("resources/models/plane/plane.glb");
    mPlaneMeshes = LoadStaticMeshes(data);
+   FreeGLTFFile(data);
+
+   // Load the normal cube
+   data = LoadGLTFFile("resources/models/cube/cube.glb");
+   mNormalCubeMeshes = LoadStaticMeshes(data);
    FreeGLTFFile(data);
 
    // Load the normal plane
@@ -204,6 +218,16 @@ void PlayState::loadModels()
    texCoordsAttribLoc = mNormalAndDepthShader->getAttributeLocation("texCoord");
 
    for (unsigned int i = 0,
+        size = static_cast<unsigned int>(mNormalCubeMeshes.size());
+        i < size;
+        ++i)
+   {
+      mNormalCubeMeshes[i].ConfigureVAO(positionsAttribLoc,
+                                        normalsAttribLoc,
+                                        texCoordsAttribLoc);
+   }
+
+   for (unsigned int i = 0,
         size = static_cast<unsigned int>(mNormalPlaneMeshes.size());
         i < size;
         ++i)
@@ -232,7 +256,11 @@ void PlayState::userInterface()
 
    if (ImGui::CollapsingHeader("Settings", nullptr, ImGuiTreeNodeFlags_DefaultOpen))
    {
+      ImGui::SliderFloat("Playback Speed", &mSelectedPlaybackSpeed, 0.0f, 1.0f, "%.3f");
 
+      ImGui::RadioButton("Display final scene", &mDisplayMode, 0);
+      ImGui::RadioButton("Display depth texture", &mDisplayMode, 1);
+      ImGui::RadioButton("Display normal texture", &mDisplayMode, 2);
    }
 
    ImGui::End();
@@ -323,6 +351,26 @@ void PlayState::renderNormalsAndDepth()
            ++i)
       {
          mNormalPlaneMeshes[i].Render();
+      }
+   }
+
+   if (mDisplayMode == 1 || mDisplayMode == 2) // Normal or depth
+   {
+      // Loop over the rigid bodies and render each one
+      const std::vector<RigidBody>& rigidBodies = mWorld.getRigidBodies();
+      for (const RigidBody& rigidBody : rigidBodies)
+      {
+         mNormalAndDepthShader->setUniformMat4("model", rigidBody.getModelMatrix(current));
+         mNormalAndDepthShader->setUniformMat3("normalMat", glm::mat3(glm::transpose(glm::inverse(rigidBody.getModelMatrix(current)))));
+
+         // Loop over the normal cube meshes and render each one
+         for (unsigned int i = 0,
+              size = static_cast<unsigned int>(mNormalCubeMeshes.size());
+              i < size;
+              ++i)
+         {
+            mNormalCubeMeshes[i].Render();
+         }
       }
    }
 

@@ -40,7 +40,7 @@ void main()
    {
       vec3 norm = vec3(texture(normalTex, uv));
       vec3 adjustedNorm = (norm * 2.0) - vec3(1.0, 1.0, 1.0);
-      if (dot(decalNormal, adjustedNorm) < normalThreshold)
+      if (dot(decalNormal, adjustedNorm) - normalThreshold < 0.0)
       {
          //fragColor = vec4(0.0, 1.0, 0.0, 1.0);
          discard;

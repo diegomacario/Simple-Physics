@@ -1,6 +1,6 @@
 #include <glm/gtx/matrix_cross_product.hpp>
 
-#include "Quat.h"
+#include "Transform.h"
 #include "World.h"
 
 World::World(const std::shared_ptr<DecalRenderer>& decalRenderer)
@@ -18,14 +18,8 @@ World::World(const std::shared_ptr<DecalRenderer>& decalRenderer)
 
 void World::initializeRigidBodies()
 {
-   // Construct a rotation around the Z axis
-   float theta = M_PI / 4.0f;
-   glm::mat3 orientation(0.0f);
-   orientation[0][0] =  glm::cos(theta);
-   orientation[0][1] =  glm::sin(theta);
-   orientation[1][0] = -glm::sin(theta);
-   orientation[1][1] =  glm::cos(theta);
-   orientation[2][2] = 1;
+   Transform orientation(glm::vec3(0.0f), Q::angleAxis(glm::radians(45.0f), glm::vec3(0.0f, 0.0f, 1.0f)), glm::vec3(1.0f));
+   //orientation = combine(orientation, Transform(glm::vec3(0.0f), Q::angleAxis(glm::radians(65.0f), glm::vec3(0.0f, 1.0f, 0.0f)), glm::vec3(1.0f)));
 
    mRigidBodies.emplace_back(1.0f, // Mass
                              0.5f, // Width
@@ -33,7 +27,7 @@ void World::initializeRigidBodies()
                              0.25f, // Depth
                              1.0f, // Coefficient of restitution
                              glm::vec3(0.0f, 0.0f, 0.0f), // Position of CM
-                             orientation, // Orientation
+                             glm::mat3(transformToMat4(orientation)), // Orientation
                              glm::vec3(-1.0f, -1.0f, -1.0f), // Velocity of CM,
                              glm::vec3(0.0f)); // Angular momentum
 }

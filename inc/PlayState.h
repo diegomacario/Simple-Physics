@@ -60,11 +60,15 @@ private:
    std::shared_ptr<Texture>               mCubeTexture;
    std::vector<AnimatedMesh>              mPlaneMeshes;
    std::shared_ptr<Texture>               mPlaneTexture;
+   std::vector<AnimatedMesh>              mNormalCubeMeshes;
    std::vector<AnimatedMesh>              mNormalPlaneMeshes;
 
    std::shared_ptr<DecalRenderer>         mDecalRenderer;
 
    World                                  mWorld;
+
+   float                                  mSelectedPlaybackSpeed = 1.0f;
+   int                                    mDisplayMode = 0;
 };
 
 #endif
