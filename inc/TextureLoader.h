@@ -20,6 +20,8 @@ public:
    TextureLoader& operator=(TextureLoader&&) = default;
 
    std::shared_ptr<Texture> loadResource(const std::string& texFilePath,
+                                         int*               outWidth  = nullptr,
+                                         int*               outHeight = nullptr,
                                          unsigned int       wrapS     = GL_REPEAT,
                                          unsigned int       wrapT     = GL_REPEAT,
                                          unsigned int       minFilter = GL_LINEAR_MIPMAP_LINEAR,

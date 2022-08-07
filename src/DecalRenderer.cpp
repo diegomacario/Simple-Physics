@@ -19,6 +19,7 @@ DecalRenderer::DecalRenderer(unsigned int widthOfFramebuffer, unsigned int heigh
    , mDecalFBO(0)
    , mNormalTexture(0)
    , mDepthTexture(0)
+   , mNormalThreshold(glm::cos(glm::radians(89.0f)))
 {
    configureDecalFBO();
 
@@ -32,7 +33,10 @@ DecalRenderer::DecalRenderer(unsigned int widthOfFramebuffer, unsigned int heigh
    mDecalShader = ResourceManager<Shader>().loadUnmanagedResource<ShaderLoader>("resources/shaders/decal.vert", "resources/shaders/decal.frag");
 
    // Load the texture of the decal
-   mDecalTexture = ResourceManager<Texture>().loadUnmanagedResource<TextureLoader>("resources/models/decal/dandy.JPG");
+   int width  = 0;
+   int height = 0;
+   mDecalTexture = ResourceManager<Texture>().loadUnmanagedResource<TextureLoader>("resources/models/decal/decal.png", &width, &height);
+   mOneOverDecalAspectRatio = static_cast<float>(height) / static_cast<float>(width);
 
    loadQuad();
    loadCube();
@@ -76,7 +80,7 @@ void DecalRenderer::renderDecals(const glm::mat4& viewMatrix, const glm::mat4& p
 
    mDecalTexture->bind(2, mDecalShader->getUniformLocation("decalTex"));
 
-   mDecalShader->setUniformFloat("normalThreshold", glm::cos(glm::radians(60.0f)));
+   mDecalShader->setUniformFloat("normalThreshold", mNormalThreshold);
    mDecalShader->setUniformBool("displayDecalOBBs", displayDecalOBBs);
    mDecalShader->setUniformBool("displayDiscardedDecalParts", displayDiscardedDecalParts);
 
@@ -178,8 +182,7 @@ void DecalRenderer::resizeTextures(unsigned int widthOfFramebuffer, unsigned int
 
 void DecalRenderer::addDecal(const glm::vec3& decalPosition, const glm::vec3& decalNormal)
 {
-   float aspectRatio = 3295.0f / 2243.0f;
-   Transform modelTransform(decalPosition, Q::lookRotation(decalNormal, glm::vec3(0.0f, 1.0f, 0.0f)), glm::vec3(1.0f, 1.0f * (1.0f / aspectRatio), 1.0f));
+   Transform modelTransform(decalPosition, Q::lookRotation(decalNormal, glm::vec3(0.0f, 1.0f, 0.0f)), glm::vec3(0.5f, 0.5f * mOneOverDecalAspectRatio, 0.5f));
    glm::mat4 decalModelMatrix = transformToMat4(modelTransform);
    mDecalModelMatrices.push_back(decalModelMatrix);
    mDecalInverseModelMatrices.push_back(glm::inverse(decalModelMatrix));

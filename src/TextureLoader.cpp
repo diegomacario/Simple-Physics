@@ -5,6 +5,8 @@
 #include "TextureLoader.h"
 
 std::shared_ptr<Texture> TextureLoader::loadResource(const std::string& texFilePath,
+                                                     int*               outWidth,
+                                                     int*               outHeight,
                                                      unsigned int       wrapS,
                                                      unsigned int       wrapT,
                                                      unsigned int       minFilter,
@@ -21,6 +23,16 @@ std::shared_ptr<Texture> TextureLoader::loadResource(const std::string& texFileP
    }
 
    unsigned int texID = generateTexture(texData, width, height, numComponents, wrapS, wrapT, minFilter, magFilter, genMipmap);
+
+   if (outWidth)
+   {
+      *outWidth = width;
+   }
+
+   if (outHeight)
+   {
+      *outHeight = height;
+   }
 
    return std::make_shared<Texture>(texID);
 }

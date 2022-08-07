@@ -42,6 +42,8 @@ private:
    unsigned int              mNormalTexture;
    unsigned int              mDepthTexture;
 
+   float                     mNormalThreshold;
+
    std::shared_ptr<Shader>   mFullScreenQuadWithNormalTextureShader;
    std::shared_ptr<Shader>   mFullScreenQuadWithDepthTextureShader;
    std::shared_ptr<Shader>   mDecalShader;
@@ -50,6 +52,7 @@ private:
    std::vector<AnimatedMesh> mCubeMeshes;
 
    std::shared_ptr<Texture>  mDecalTexture;
+   float                     mOneOverDecalAspectRatio;
 
    std::vector<glm::mat4>    mDecalModelMatrices;
    std::vector<glm::mat4>    mDecalInverseModelMatrices;

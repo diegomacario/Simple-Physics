@@ -50,6 +50,9 @@ private:
    int                            mCollidingVertexIndex;
    glm::vec3                      mCollisionNormal;
 
+   glm::vec3                      mDecalNormal;
+   bool                           mFirstCheckForCollisions;
+
    std::shared_ptr<DecalRenderer> mDecalRenderer;
 };
 

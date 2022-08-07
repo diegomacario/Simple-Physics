@@ -81,7 +81,9 @@ bool World::simulate(float deltaTime)
          iter->calculateWorldSpaceVertices(future);
       }
 
+      mFirstCheckForCollisions = true;
       checkForCollisions();
+      mFirstCheckForCollisions = false;
 
       if (mCollisionState == CollisionState::penetrating)
       {
@@ -102,7 +104,7 @@ bool World::simulate(float deltaTime)
 
       if (mCollidingRigidBodyIndex != -1 && mCollidingVertexIndex != -1)
       {
-         mDecalRenderer->addDecal(mRigidBodies[mCollidingRigidBodyIndex].getState(future).verticesInWorldSpace[mCollidingVertexIndex], mCollisionNormal);
+         mDecalRenderer->addDecal(mRigidBodies[mCollidingRigidBodyIndex].getState(future).verticesInWorldSpace[mCollidingVertexIndex], mDecalNormal);
       }
 
       // We made a successful step, so swap configurations to save the data for the next step
@@ -299,6 +301,18 @@ World::CollisionState World::checkForCollisions()
                   mCollidingRigidBodyIndex = rigidBodyIndex;
                   mCollidingVertexIndex    = vertexIndex;
                   mCollisionNormal         = wall.getNormal();
+
+                  if (mFirstCheckForCollisions)
+                  {
+                     // Uncomment this if you want the decal bounding boxes to look in the direction of the normal of the wall that the body collided with
+                     mDecalNormal = mCollisionNormal;
+
+                     // Uncomment this if you want the decal bounding boxes to look in the direction of the colliding body's velocity
+                     //mDecalNormal = glm::normalize(dynamicAndKinematicState.velocityOfCM * -1.0f);
+
+                     // Uncomment this if you want the decal bounding boxes to look in the direction of the colliding vertex's velocity
+                     //mDecalNormal = glm::normalize(velocity * -1.0f);
+                  }
                }
             }
          }
