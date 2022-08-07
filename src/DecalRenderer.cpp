@@ -84,14 +84,11 @@ void DecalRenderer::renderDecals(const glm::mat4& viewMatrix, const glm::mat4& p
    mDecalShader->setUniformBool("displayDecalOBBs", displayDecalOBBs);
    mDecalShader->setUniformBool("displayDiscardedDecalParts", displayDiscardedDecalParts);
 
-   for (unsigned int decalIndex = 0,
-        numDecals = static_cast<unsigned int>(mDecalModelMatrices.size());
-        decalIndex < numDecals;
-        ++decalIndex)
+   for (const Decal& decal : mDecals)
    {
-      mDecalShader->setUniformMat4("model", mDecalModelMatrices[decalIndex]);
-      mDecalShader->setUniformMat4("inverseModel", mDecalInverseModelMatrices[decalIndex]);
-      mDecalShader->setUniformVec3("decalNormal", mDecalNormals[decalIndex]);
+      mDecalShader->setUniformMat4("model", decal.getModelMatrix());
+      mDecalShader->setUniformMat4("inverseModel", decal.getInverseModelMatrix());
+      mDecalShader->setUniformVec3("decalNormal", decal.getNormal());
 
       // Loop over the cube meshes and render each one
       for (unsigned int meshIndex = 0,
@@ -184,9 +181,7 @@ void DecalRenderer::addDecal(const glm::vec3& decalPosition, const glm::vec3& de
 {
    Transform modelTransform(decalPosition, Q::lookRotation(decalNormal, glm::vec3(0.0f, 1.0f, 0.0f)), glm::vec3(0.5f, 0.5f * mOneOverDecalAspectRatio, 0.5f));
    glm::mat4 decalModelMatrix = transformToMat4(modelTransform);
-   mDecalModelMatrices.push_back(decalModelMatrix);
-   mDecalInverseModelMatrices.push_back(glm::inverse(decalModelMatrix));
-   mDecalNormals.push_back(decalNormal);
+   mDecals.emplace_back(decalModelMatrix, decalNormal);
 }
 
 void DecalRenderer::configureDecalFBO()

@@ -4,6 +4,7 @@
 #include "Shader.h"
 #include "AnimatedMesh.h"
 #include "Texture.h"
+#include "Decal.h"
 
 class DecalRenderer
 {
@@ -54,9 +55,7 @@ private:
    std::shared_ptr<Texture>  mDecalTexture;
    float                     mOneOverDecalAspectRatio;
 
-   std::vector<glm::mat4>    mDecalModelMatrices;
-   std::vector<glm::mat4>    mDecalInverseModelMatrices;
-   std::vector<glm::vec3>    mDecalNormals;
+   std::vector<Decal>        mDecals;
 };
 
 #endif
