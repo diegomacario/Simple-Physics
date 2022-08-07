@@ -129,8 +129,7 @@ bool Window::initialize()
 #endif
 
    glEnable(GL_CULL_FACE);
-   // TODO: Not sure if this has any negative consequences. Need to read more
-   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 #ifndef __EMSCRIPTEN__
    glEnable(GL_LINE_SMOOTH);

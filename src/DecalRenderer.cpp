@@ -35,7 +35,14 @@ DecalRenderer::DecalRenderer(unsigned int widthOfFramebuffer, unsigned int heigh
    // Load the texture of the decal
    int width  = 0;
    int height = 0;
-   mDecalTexture = ResourceManager<Texture>().loadUnmanagedResource<TextureLoader>("resources/models/decal/decal.png", &width, &height);
+   mDecalTexture = ResourceManager<Texture>().loadUnmanagedResource<TextureLoader>("resources/models/decal/circles_2048.png",
+                                                                                   &width,
+                                                                                   &height,
+                                                                                   GL_CLAMP_TO_EDGE,
+                                                                                   GL_CLAMP_TO_EDGE,
+                                                                                   GL_LINEAR,
+                                                                                   GL_LINEAR,
+                                                                                   false);
    mOneOverDecalAspectRatio = static_cast<float>(height) / static_cast<float>(width);
 
    loadQuad();

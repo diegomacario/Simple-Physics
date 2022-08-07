@@ -132,7 +132,9 @@ void PlayState::render()
    {
       renderWalls();
       glDisable(GL_DEPTH_TEST);
+      glEnable(GL_BLEND);
       mDecalRenderer->renderDecals(mCamera3.getViewMatrix(), mCamera3.getPerspectiveProjectionMatrix(), mDisplayDecalOBBs, mDisplayDiscardedDecalParts);
+      glDisable(GL_BLEND);
       glEnable(GL_DEPTH_TEST);
       renderRigidBodies();
    }
