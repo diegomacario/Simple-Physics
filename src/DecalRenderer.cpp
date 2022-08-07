@@ -35,7 +35,7 @@ DecalRenderer::DecalRenderer(unsigned int widthOfFramebuffer, unsigned int heigh
    // Load the texture of the decal
    int width  = 0;
    int height = 0;
-   mDecalTexture = ResourceManager<Texture>().loadUnmanagedResource<TextureLoader>("resources/models/decal/circles_2048.png",
+   mDecalTexture = ResourceManager<Texture>().loadUnmanagedResource<TextureLoader>("resources/models/decals/1024/circles_1_1024.png",
                                                                                    &width,
                                                                                    &height,
                                                                                    GL_CLAMP_TO_EDGE,
