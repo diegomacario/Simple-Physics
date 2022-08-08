@@ -1,14 +1,17 @@
 #ifndef DECAL_H
 #define DECAL_H
 
-#include <glm/glm.hpp>
+#include "Transform.h"
+#include "Track.h"
 
 class Decal
 {
 public:
 
-   Decal(const glm::mat4& modelMatrix, const glm::vec3& normal);
+   Decal(const Transform& modelTransform, const glm::vec3& normal);
    ~Decal() = default;
+
+   void             update(const ScalarTrack& growAnimation);
 
    const glm::mat4& getModelMatrix() const { return mModelMatrix; }
    const glm::mat4& getInverseModelMatrix() const { return mInverseModelMatrix; }
@@ -16,9 +19,11 @@ public:
 
 private:
 
+   Transform mModelTransform;
    glm::mat4 mModelMatrix;
    glm::mat4 mInverseModelMatrix;
    glm::vec3 mNormal;
+   float     mPlaybackTime;
 };
 
 #endif

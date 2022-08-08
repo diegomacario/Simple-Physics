@@ -33,20 +33,18 @@ DecalRenderer::DecalRenderer(unsigned int widthOfFramebuffer, unsigned int heigh
    mDecalShader = ResourceManager<Shader>().loadUnmanagedResource<ShaderLoader>("resources/shaders/decal.vert", "resources/shaders/decal.frag");
 
    // Load the texture of the decal
-   int width  = 0;
-   int height = 0;
    mDecalTexture = ResourceManager<Texture>().loadUnmanagedResource<TextureLoader>("resources/models/decals/1024/circles_1_1024.png",
-                                                                                   &width,
-                                                                                   &height,
+                                                                                   nullptr,
+                                                                                   nullptr,
                                                                                    GL_CLAMP_TO_EDGE,
                                                                                    GL_CLAMP_TO_EDGE,
                                                                                    GL_LINEAR,
                                                                                    GL_LINEAR,
                                                                                    false);
-   mOneOverDecalAspectRatio = static_cast<float>(height) / static_cast<float>(width);
 
    loadQuad();
    loadCube();
+   composeGrowAnimation();
 }
 
 DecalRenderer::~DecalRenderer()
@@ -186,9 +184,16 @@ void DecalRenderer::resizeTextures(unsigned int widthOfFramebuffer, unsigned int
 
 void DecalRenderer::addDecal(const glm::vec3& decalPosition, const glm::vec3& decalNormal)
 {
-   Transform modelTransform(decalPosition, Q::lookRotation(decalNormal, glm::vec3(0.0f, 1.0f, 0.0f)), glm::vec3(0.5f, 0.5f * mOneOverDecalAspectRatio, 0.5f));
-   glm::mat4 decalModelMatrix = transformToMat4(modelTransform);
-   mDecals.emplace_back(decalModelMatrix, decalNormal);
+   Transform modelTransform(decalPosition, Q::lookRotation(decalNormal, glm::vec3(0.0f, 1.0f, 0.0f)), glm::vec3(1.0f, 1.0f, 1.0f));
+   mDecals.emplace_back(modelTransform, decalNormal);
+}
+
+void DecalRenderer::updateDecals()
+{
+   for (Decal& decal : mDecals)
+   {
+      decal.update(mGrowAnimation);
+   }
 }
 
 void DecalRenderer::configureDecalFBO()
@@ -277,3 +282,23 @@ void DecalRenderer::loadCube()
    }
 }
 
+void DecalRenderer::composeGrowAnimation()
+{
+   // Compose the grow animation
+   mGrowAnimation.SetInterpolation(Interpolation::Cubic);
+   mGrowAnimation.SetNumberOfFrames(2);
+
+   // Frame 0
+   ScalarFrame& frame0 = mGrowAnimation.GetFrame(0);
+   frame0.mTime        = 0.0f;
+   frame0.mInSlope[0]  = 0.0f;
+   frame0.mValue[0]    = 0.0f;
+   frame0.mOutSlope[0] = 4.5f;
+
+   // Frame 1
+   ScalarFrame& frame1 = mGrowAnimation.GetFrame(1);
+   frame1.mTime        = 1.0f;
+   frame1.mInSlope[0]  = 0.0f;
+   frame1.mValue[0]    = 1.0f;
+   frame1.mOutSlope[0] = 0.0f;
+}

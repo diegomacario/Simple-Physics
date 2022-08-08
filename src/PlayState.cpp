@@ -103,6 +103,8 @@ void PlayState::update(float deltaTime)
 {
    // TODO: Handle simulation errors
    mWorld.simulate(deltaTime * mSelectedPlaybackSpeed);
+
+   mDecalRenderer->updateDecals();
 }
 
 void PlayState::render()

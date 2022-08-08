@@ -26,6 +26,7 @@ public:
    void         renderDepthTextureToFullScreenQuad();
    void         resizeTextures(unsigned int widthOfFramebuffer, unsigned int heightOfFramebuffer);
    void         addDecal(const glm::vec3& decalPosition, const glm::vec3& decalNormal);
+   void         updateDecals();
 
 private:
 
@@ -36,6 +37,7 @@ private:
 
    void         loadQuad();
    void         loadCube();
+   void         composeGrowAnimation();
 
    unsigned int              mWidthOfFramebuffer;
    unsigned int              mHeightOfFramebuffer;
@@ -53,9 +55,10 @@ private:
    std::vector<AnimatedMesh> mCubeMeshes;
 
    std::shared_ptr<Texture>  mDecalTexture;
-   float                     mOneOverDecalAspectRatio;
 
    std::vector<Decal>        mDecals;
+
+   ScalarTrack               mGrowAnimation;
 };
 
 #endif
