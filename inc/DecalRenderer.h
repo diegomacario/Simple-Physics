@@ -1,6 +1,9 @@
 #ifndef DECAL_RENDERER_H
 #define DECAL_RENDERER_H
 
+#include <list>
+#include <deque>
+
 #include "Shader.h"
 #include "AnimatedMesh.h"
 #include "Texture.h"
@@ -39,26 +42,28 @@ private:
    void         loadCube();
    void         composeGrowAnimation();
 
-   unsigned int              mWidthOfFramebuffer;
-   unsigned int              mHeightOfFramebuffer;
-   unsigned int              mDecalFBO;
-   unsigned int              mNormalTexture;
-   unsigned int              mDepthTexture;
+   unsigned int                           mWidthOfFramebuffer;
+   unsigned int                           mHeightOfFramebuffer;
+   unsigned int                           mDecalFBO;
+   unsigned int                           mNormalTexture;
+   unsigned int                           mDepthTexture;
 
-   float                     mNormalThreshold;
+   float                                  mNormalThreshold;
 
-   std::shared_ptr<Shader>   mFullScreenQuadWithNormalTextureShader;
-   std::shared_ptr<Shader>   mFullScreenQuadWithDepthTextureShader;
-   std::shared_ptr<Shader>   mDecalShader;
+   std::shared_ptr<Shader>                mFullScreenQuadWithNormalTextureShader;
+   std::shared_ptr<Shader>                mFullScreenQuadWithDepthTextureShader;
+   std::shared_ptr<Shader>                mDecalShader;
 
-   std::vector<AnimatedMesh> mQuadMeshes;
-   std::vector<AnimatedMesh> mCubeMeshes;
+   std::vector<AnimatedMesh>              mQuadMeshes;
+   std::vector<AnimatedMesh>              mCubeMeshes;
 
-   std::shared_ptr<Texture>  mDecalTexture;
+   std::shared_ptr<Texture>               mDecalTexture;
 
-   std::vector<Decal>        mDecals;
+   std::list<Decal>                       mDecals;
+   std::deque<std::list<Decal>::iterator> mGrowingDecals;
+   std::deque<std::list<Decal>::iterator> mStableDecals;
 
-   ScalarTrack               mGrowAnimation;
+   ScalarTrack                            mGrowAnimation;
 };
 
 #endif

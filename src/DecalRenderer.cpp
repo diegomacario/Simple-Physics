@@ -89,11 +89,29 @@ void DecalRenderer::renderDecals(const glm::mat4& viewMatrix, const glm::mat4& p
    mDecalShader->setUniformBool("displayDecalOBBs", displayDecalOBBs);
    mDecalShader->setUniformBool("displayDiscardedDecalParts", displayDiscardedDecalParts);
 
-   for (const Decal& decal : mDecals)
+   // Render stable decals
+   for (const std::list<Decal>::iterator& stableDecalIter : mStableDecals)
    {
-      mDecalShader->setUniformMat4("model", decal.getModelMatrix());
-      mDecalShader->setUniformMat4("inverseModel", decal.getInverseModelMatrix());
-      mDecalShader->setUniformVec3("decalNormal", decal.getNormal());
+      mDecalShader->setUniformMat4("model", stableDecalIter->getModelMatrix());
+      mDecalShader->setUniformMat4("inverseModel", stableDecalIter->getInverseModelMatrix());
+      mDecalShader->setUniformVec3("decalNormal", stableDecalIter->getNormal());
+
+      // Loop over the cube meshes and render each one
+      for (unsigned int meshIndex = 0,
+           numMeshes = static_cast<unsigned int>(mCubeMeshes.size());
+           meshIndex < numMeshes;
+           ++meshIndex)
+      {
+         mCubeMeshes[meshIndex].Render();
+      }
+   }
+
+   // Render growing decals
+   for (const std::list<Decal>::iterator& growingDecalIter : mGrowingDecals)
+   {
+      mDecalShader->setUniformMat4("model", growingDecalIter->getModelMatrix());
+      mDecalShader->setUniformMat4("inverseModel", growingDecalIter->getInverseModelMatrix());
+      mDecalShader->setUniformVec3("decalNormal", growingDecalIter->getNormal());
 
       // Loop over the cube meshes and render each one
       for (unsigned int meshIndex = 0,
@@ -186,13 +204,39 @@ void DecalRenderer::addDecal(const glm::vec3& decalPosition, const glm::vec3& de
 {
    Transform modelTransform(decalPosition, Q::lookRotation(decalNormal, glm::vec3(0.0f, 1.0f, 0.0f)), glm::vec3(1.0f, 1.0f, 1.0f));
    mDecals.emplace_back(modelTransform, decalNormal);
+   mGrowingDecals.push_back(std::prev(mDecals.end()));
 }
 
 void DecalRenderer::updateDecals()
 {
-   for (Decal& decal : mDecals)
+   unsigned int numDecalsDoneGrowing = 0;
+   for (const std::list<Decal>::iterator& growingDecalIter : mGrowingDecals)
    {
-      decal.update(mGrowAnimation);
+      if (growingDecalIter->grow(mGrowAnimation))
+      {
+         mStableDecals.push_back(growingDecalIter);
+         ++numDecalsDoneGrowing;
+      }
+   }
+
+   if (numDecalsDoneGrowing > 0)
+   {
+      mGrowingDecals.erase(mGrowingDecals.begin(), std::next(mGrowingDecals.begin(), numDecalsDoneGrowing));
+   }
+
+   unsigned int numDecalsDoneLiving = 0;
+   for (const std::list<Decal>::iterator& stableDecalIter : mStableDecals)
+   {
+      if (stableDecalIter->updateLifetime())
+      {
+         ++numDecalsDoneLiving;
+      }
+   }
+
+   if (numDecalsDoneLiving > 0)
+   {
+      mStableDecals.erase(mStableDecals.begin(), std::next(mStableDecals.begin(), numDecalsDoneLiving));
+      mDecals.erase(mDecals.begin(), std::next(mDecals.begin(), numDecalsDoneLiving));
    }
 }
 

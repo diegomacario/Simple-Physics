@@ -11,7 +11,8 @@ public:
    Decal(const Transform& modelTransform, const glm::vec3& normal);
    ~Decal() = default;
 
-   void             update(const ScalarTrack& growAnimation);
+   bool             grow(const ScalarTrack& growAnimation);
+   bool             updateLifetime();
 
    const glm::mat4& getModelMatrix() const { return mModelMatrix; }
    const glm::mat4& getInverseModelMatrix() const { return mInverseModelMatrix; }
