@@ -47,32 +47,37 @@ private:
    void         updateStableDecals();
    void         updateShrinkingDecals();
 
+   void         renderGrowingDecals();
    void         renderDecals(const std::deque<std::list<Decal>::iterator>& decals);
 
-   unsigned int                           mWidthOfFramebuffer;
-   unsigned int                           mHeightOfFramebuffer;
-   unsigned int                           mDecalFBO;
-   unsigned int                           mNormalTexture;
-   unsigned int                           mDepthTexture;
+   glm::vec3    hexToColor(int hex);
 
-   float                                  mNormalThreshold;
+   unsigned int                            mWidthOfFramebuffer;
+   unsigned int                            mHeightOfFramebuffer;
+   unsigned int                            mDecalFBO;
+   unsigned int                            mNormalTexture;
+   unsigned int                            mDepthTexture;
 
-   std::shared_ptr<Shader>                mFullScreenQuadWithNormalTextureShader;
-   std::shared_ptr<Shader>                mFullScreenQuadWithDepthTextureShader;
-   std::shared_ptr<Shader>                mDecalShader;
+   float                                   mNormalThreshold;
 
-   std::vector<AnimatedMesh>              mQuadMeshes;
-   std::vector<AnimatedMesh>              mCubeMeshes;
+   std::shared_ptr<Shader>                 mFullScreenQuadWithNormalTextureShader;
+   std::shared_ptr<Shader>                 mFullScreenQuadWithDepthTextureShader;
+   std::shared_ptr<Shader>                 mDecalShader;
 
-   std::shared_ptr<Texture>               mDecalTexture;
+   std::vector<AnimatedMesh>               mQuadMeshes;
+   std::vector<AnimatedMesh>               mCubeMeshes;
 
-   std::list<Decal>                       mDecals;
-   std::deque<std::list<Decal>::iterator> mGrowingDecals;
-   std::deque<std::list<Decal>::iterator> mStableDecals;
-   std::deque<std::list<Decal>::iterator> mShrinkingDecals;
+   std::shared_ptr<Texture>                mDecalTexture;
+   std::array<std::shared_ptr<Texture>, 4> mCircleTextures;
+   std::array<glm::vec3, 4>                mCircleColors;
 
-   ScalarTrack                            mGrowAnimation;
-   ScalarTrack                            mShrinkAnimation;
+   std::list<Decal>                        mDecals;
+   std::deque<std::list<Decal>::iterator>  mGrowingDecals;
+   std::deque<std::list<Decal>::iterator>  mStableDecals;
+   std::deque<std::list<Decal>::iterator>  mShrinkingDecals;
+
+   ScalarTrack                             mGrowAnimation;
+   ScalarTrack                             mShrinkAnimation;
 };
 
 #endif
