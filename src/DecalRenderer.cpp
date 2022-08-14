@@ -45,6 +45,7 @@ DecalRenderer::DecalRenderer(unsigned int widthOfFramebuffer, unsigned int heigh
    loadQuad();
    loadCube();
    composeGrowAnimation();
+   composeShrinkAnimation();
 }
 
 DecalRenderer::~DecalRenderer()
@@ -89,39 +90,9 @@ void DecalRenderer::renderDecals(const glm::mat4& viewMatrix, const glm::mat4& p
    mDecalShader->setUniformBool("displayDecalOBBs", displayDecalOBBs);
    mDecalShader->setUniformBool("displayDiscardedDecalParts", displayDiscardedDecalParts);
 
-   // Render stable decals
-   for (const std::list<Decal>::iterator& stableDecalIter : mStableDecals)
-   {
-      mDecalShader->setUniformMat4("model", stableDecalIter->getModelMatrix());
-      mDecalShader->setUniformMat4("inverseModel", stableDecalIter->getInverseModelMatrix());
-      mDecalShader->setUniformVec3("decalNormal", stableDecalIter->getNormal());
-
-      // Loop over the cube meshes and render each one
-      for (unsigned int meshIndex = 0,
-           numMeshes = static_cast<unsigned int>(mCubeMeshes.size());
-           meshIndex < numMeshes;
-           ++meshIndex)
-      {
-         mCubeMeshes[meshIndex].Render();
-      }
-   }
-
-   // Render growing decals
-   for (const std::list<Decal>::iterator& growingDecalIter : mGrowingDecals)
-   {
-      mDecalShader->setUniformMat4("model", growingDecalIter->getModelMatrix());
-      mDecalShader->setUniformMat4("inverseModel", growingDecalIter->getInverseModelMatrix());
-      mDecalShader->setUniformVec3("decalNormal", growingDecalIter->getNormal());
-
-      // Loop over the cube meshes and render each one
-      for (unsigned int meshIndex = 0,
-           numMeshes = static_cast<unsigned int>(mCubeMeshes.size());
-           meshIndex < numMeshes;
-           ++meshIndex)
-      {
-         mCubeMeshes[meshIndex].Render();
-      }
-   }
+   renderDecals(mShrinkingDecals);
+   renderDecals(mStableDecals);
+   renderDecals(mGrowingDecals);
 
    glActiveTexture(GL_TEXTURE1);
    glBindTexture(GL_TEXTURE_2D, 0);
@@ -209,35 +180,9 @@ void DecalRenderer::addDecal(const glm::vec3& decalPosition, const glm::vec3& de
 
 void DecalRenderer::updateDecals()
 {
-   unsigned int numDecalsDoneGrowing = 0;
-   for (const std::list<Decal>::iterator& growingDecalIter : mGrowingDecals)
-   {
-      if (growingDecalIter->grow(mGrowAnimation))
-      {
-         mStableDecals.push_back(growingDecalIter);
-         ++numDecalsDoneGrowing;
-      }
-   }
-
-   if (numDecalsDoneGrowing > 0)
-   {
-      mGrowingDecals.erase(mGrowingDecals.begin(), std::next(mGrowingDecals.begin(), numDecalsDoneGrowing));
-   }
-
-   unsigned int numDecalsDoneLiving = 0;
-   for (const std::list<Decal>::iterator& stableDecalIter : mStableDecals)
-   {
-      if (stableDecalIter->updateLifetime())
-      {
-         ++numDecalsDoneLiving;
-      }
-   }
-
-   if (numDecalsDoneLiving > 0)
-   {
-      mStableDecals.erase(mStableDecals.begin(), std::next(mStableDecals.begin(), numDecalsDoneLiving));
-      mDecals.erase(mDecals.begin(), std::next(mDecals.begin(), numDecalsDoneLiving));
-   }
+   updateGrowingDecals();
+   updateStableDecals();
+   updateShrinkingDecals();
 }
 
 void DecalRenderer::configureDecalFBO()
@@ -345,4 +290,94 @@ void DecalRenderer::composeGrowAnimation()
    frame1.mInSlope[0]  = 0.0f;
    frame1.mValue[0]    = 1.0f;
    frame1.mOutSlope[0] = 0.0f;
+}
+
+void DecalRenderer::composeShrinkAnimation()
+{
+   // Compose the shrink animation
+   mShrinkAnimation.SetInterpolation(Interpolation::Cubic);
+   mShrinkAnimation.SetNumberOfFrames(2);
+
+   // Frame 0
+   ScalarFrame& frame0 = mShrinkAnimation.GetFrame(0);
+   frame0.mTime        = 0.0f;
+   frame0.mInSlope[0]  = 0.0f;
+   frame0.mValue[0]    = 1.0f;
+   frame0.mOutSlope[0] = 4.5f;
+
+   // Frame 1
+   ScalarFrame& frame1 = mShrinkAnimation.GetFrame(1);
+   frame1.mTime        = 1.0f;
+   frame1.mInSlope[0]  = 0.0f;
+   frame1.mValue[0]    = 0.0f;
+   frame1.mOutSlope[0] = 0.0f;
+}
+
+void DecalRenderer::updateGrowingDecals()
+{
+   unsigned int numDecalsDoneGrowing = 0;
+   for (const std::list<Decal>::iterator& growingDecalIter : mGrowingDecals)
+   {
+      if (growingDecalIter->grow(mGrowAnimation))
+      {
+         mStableDecals.push_back(growingDecalIter);
+         ++numDecalsDoneGrowing;
+      }
+   }
+
+   if (numDecalsDoneGrowing > 0)
+   {
+      mGrowingDecals.erase(mGrowingDecals.begin(), std::next(mGrowingDecals.begin(), numDecalsDoneGrowing));
+   }
+}
+
+void DecalRenderer::updateStableDecals()
+{
+   int numDecalsToStartShrinking = static_cast<int>(mStableDecals.size()) - 5;
+   if (numDecalsToStartShrinking > 0)
+   {
+      for (int i = 0; i < numDecalsToStartShrinking; ++i)
+      {
+         mShrinkingDecals.push_back(mStableDecals[i]);
+      }
+
+      mStableDecals.erase(mStableDecals.begin(), std::next(mStableDecals.begin(), numDecalsToStartShrinking));
+   }
+}
+
+void DecalRenderer::updateShrinkingDecals()
+{
+   unsigned int numDecalsDoneShrinking = 0;
+   for (const std::list<Decal>::iterator& shrinkingDecalIter : mShrinkingDecals)
+   {
+      if (shrinkingDecalIter->shrink(mShrinkAnimation))
+      {
+         ++numDecalsDoneShrinking;
+      }
+   }
+
+   if (numDecalsDoneShrinking > 0)
+   {
+      mShrinkingDecals.erase(mShrinkingDecals.begin(), std::next(mShrinkingDecals.begin(), numDecalsDoneShrinking));
+      mDecals.erase(mDecals.begin(), std::next(mDecals.begin(), numDecalsDoneShrinking));
+   }
+}
+
+void DecalRenderer::renderDecals(const std::deque<std::list<Decal>::iterator>& decals)
+{
+   for (const std::list<Decal>::iterator& decalIter : decals)
+   {
+      mDecalShader->setUniformMat4("model", decalIter->getModelMatrix());
+      mDecalShader->setUniformMat4("inverseModel", decalIter->getInverseModelMatrix());
+      mDecalShader->setUniformVec3("decalNormal", decalIter->getNormal());
+
+      // Loop over the cube meshes and render each one
+      for (unsigned int meshIndex = 0,
+           numMeshes = static_cast<unsigned int>(mCubeMeshes.size());
+           meshIndex < numMeshes;
+           ++meshIndex)
+      {
+         mCubeMeshes[meshIndex].Render();
+      }
+   }
 }

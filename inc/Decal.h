@@ -12,7 +12,7 @@ public:
    ~Decal() = default;
 
    bool             grow(const ScalarTrack& growAnimation);
-   bool             updateLifetime();
+   bool             shrink(const ScalarTrack& shrinkAnimation);
 
    const glm::mat4& getModelMatrix() const { return mModelMatrix; }
    const glm::mat4& getInverseModelMatrix() const { return mInverseModelMatrix; }

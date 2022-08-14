@@ -41,6 +41,13 @@ private:
    void         loadQuad();
    void         loadCube();
    void         composeGrowAnimation();
+   void         composeShrinkAnimation();
+
+   void         updateGrowingDecals();
+   void         updateStableDecals();
+   void         updateShrinkingDecals();
+
+   void         renderDecals(const std::deque<std::list<Decal>::iterator>& decals);
 
    unsigned int                           mWidthOfFramebuffer;
    unsigned int                           mHeightOfFramebuffer;
@@ -62,8 +69,10 @@ private:
    std::list<Decal>                       mDecals;
    std::deque<std::list<Decal>::iterator> mGrowingDecals;
    std::deque<std::list<Decal>::iterator> mStableDecals;
+   std::deque<std::list<Decal>::iterator> mShrinkingDecals;
 
    ScalarTrack                            mGrowAnimation;
+   ScalarTrack                            mShrinkAnimation;
 };
 
 #endif
