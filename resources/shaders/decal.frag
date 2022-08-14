@@ -12,7 +12,7 @@ uniform vec3 decalNormal;
 uniform float normalThreshold;
 uniform bool displayDecalOBBs;
 uniform bool displayDiscardedDecalParts;
-uniform bool growing;
+uniform bool animated;
 uniform vec3 decalColor;
 
 out vec4 fragColor;
@@ -58,7 +58,7 @@ void main()
          // Negate Y to flip the texture vertically
          vec2 uv       = vec2(objectSpacePos.x, -objectSpacePos.y) + 0.5;
          vec4 texColor = texture(decalTex, uv);
-         if (growing)
+         if (animated)
          {
             texColor *= vec4(decalColor, 1.0);
          }

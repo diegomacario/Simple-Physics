@@ -1,6 +1,6 @@
 #include "Decal.h"
 
-Decal::Decal(const Transform& modelTransform, const glm::vec3& normal)
+Decal::Decal(const Transform& modelTransform, const glm::vec3& normal, unsigned int decalIndex)
    : mModelTransform()
    , mModelMatrix()
    , mInverseModelMatrix()
@@ -10,6 +10,7 @@ Decal::Decal(const Transform& modelTransform, const glm::vec3& normal)
    , mCircleModelMatrices()
    , mCircleInverseModelMatrices()
    , mCirclePlaybackTimes({0.0f, -0.1f, -0.2f, -0.3f})
+   , mDecalIndex(decalIndex)
 {
 
 }

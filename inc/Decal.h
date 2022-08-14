@@ -10,7 +10,7 @@ class Decal
 {
 public:
 
-   Decal(const Transform& modelTransform, const glm::vec3& normal);
+   Decal(const Transform& modelTransform, const glm::vec3& normal, unsigned int decalIndex);
    ~Decal() = default;
 
    bool                            grow(const ScalarTrack& growAnimation);
@@ -22,6 +22,8 @@ public:
 
    const std::array<glm::mat4, 4>& getCircleModelMatrices() const { return mCircleModelMatrices; }
    const std::array<glm::mat4, 4>& getCircleInverseModelMatrices() const { return mCircleInverseModelMatrices; }
+
+   unsigned int                    getDecalIndex() const { return mDecalIndex; }
 
 private:
 
@@ -35,6 +37,8 @@ private:
    std::array<glm::mat4, 4> mCircleModelMatrices;
    std::array<glm::mat4, 4> mCircleInverseModelMatrices;
    std::array<float, 4>     mCirclePlaybackTimes;
+
+   unsigned int             mDecalIndex;
 };
 
 #endif

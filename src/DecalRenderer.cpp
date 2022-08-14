@@ -20,6 +20,7 @@ DecalRenderer::DecalRenderer(unsigned int widthOfFramebuffer, unsigned int heigh
    , mNormalTexture(0)
    , mDepthTexture(0)
    , mNormalThreshold(glm::cos(glm::radians(89.0f)))
+   , mDecalIndex(0)
 {
    configureDecalFBO();
 
@@ -32,9 +33,14 @@ DecalRenderer::DecalRenderer(unsigned int widthOfFramebuffer, unsigned int heigh
    // Initialize the decal shader
    mDecalShader = ResourceManager<Shader>().loadUnmanagedResource<ShaderLoader>("resources/shaders/decal.vert", "resources/shaders/decal.frag");
 
-   // Load the textures of the decals
-   mDecalTexture = ResourceManager<Texture>().loadUnmanagedResource<TextureLoader>("resources/models/decals/circles_0.png", nullptr, nullptr, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_LINEAR, GL_LINEAR, false);
+   // Load the textures of the stable decals
+   for (int i = 0; i < 20; ++i)
+   {
+      std::string decalPath = "resources/models/decals/circles_" + std::to_string(i) + ".png";
+      mDecalTextures[i] = ResourceManager<Texture>().loadUnmanagedResource<TextureLoader>(decalPath, nullptr, nullptr, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_LINEAR, GL_LINEAR, false);
+   }
 
+   // Load the textures of the animated decals
    mCircleTextures = {
       ResourceManager<Texture>().loadUnmanagedResource<TextureLoader>("resources/models/decals/circle_0.png", nullptr, nullptr, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_LINEAR, GL_LINEAR, false),
       ResourceManager<Texture>().loadUnmanagedResource<TextureLoader>("resources/models/decals/circle_1.png", nullptr, nullptr, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_LINEAR, GL_LINEAR, false),
@@ -42,8 +48,29 @@ DecalRenderer::DecalRenderer(unsigned int widthOfFramebuffer, unsigned int heigh
       ResourceManager<Texture>().loadUnmanagedResource<TextureLoader>("resources/models/decals/circle_3.png", nullptr, nullptr, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_LINEAR, GL_LINEAR, false)
    };
 
-   // Load the colors of the decals
-   mCircleColors = {hexToColor(0x6A2C70), hexToColor(0xB83B5E), hexToColor(0xF08A5D), hexToColor(0xF9ED69)};
+   // Load the colors of the animated decals
+   mCircleColors = {
+      std::array<glm::vec3, 4>{ hexToColor(0x6A2C70), hexToColor(0xB83B5E), hexToColor(0xF08A5D), hexToColor(0xF9ED69) },
+      std::array<glm::vec3, 4>{ hexToColor(0xF9ED69), hexToColor(0xF08A5D), hexToColor(0xB83B5E), hexToColor(0x6A2C70) },
+      std::array<glm::vec3, 4>{ hexToColor(0x2D4059), hexToColor(0xEA5455), hexToColor(0xF07B3F), hexToColor(0xFFD460) },
+      std::array<glm::vec3, 4>{ hexToColor(0xFFD460), hexToColor(0xF07B3F), hexToColor(0xEA5455), hexToColor(0x2D4059) },
+      std::array<glm::vec3, 4>{ hexToColor(0xD92027), hexToColor(0xFF9234), hexToColor(0xFFCD3C), hexToColor(0x35D0BA) },
+      std::array<glm::vec3, 4>{ hexToColor(0x35D0BA), hexToColor(0xFFCD3C), hexToColor(0xFF9234), hexToColor(0xD92027) },
+      std::array<glm::vec3, 4>{ hexToColor(0x071A52), hexToColor(0x086972), hexToColor(0x17B978), hexToColor(0xA7FF83) },
+      std::array<glm::vec3, 4>{ hexToColor(0xA7FF83), hexToColor(0x17B978), hexToColor(0x086972), hexToColor(0x071A52) },
+      std::array<glm::vec3, 4>{ hexToColor(0xF7FD04), hexToColor(0xF9B208), hexToColor(0xF98404), hexToColor(0xFC5404) },
+      std::array<glm::vec3, 4>{ hexToColor(0xFC5404), hexToColor(0xF98404), hexToColor(0xF9B208), hexToColor(0xF7FD04) },
+      std::array<glm::vec3, 4>{ hexToColor(0x00AD7C), hexToColor(0x52D681), hexToColor(0xB5FF7D), hexToColor(0xFFF8B5) },
+      std::array<glm::vec3, 4>{ hexToColor(0xFFF8B5), hexToColor(0xB5FF7D), hexToColor(0x52D681), hexToColor(0x00AD7C) },
+      std::array<glm::vec3, 4>{ hexToColor(0xF06868), hexToColor(0xFAB57A), hexToColor(0xEDF798), hexToColor(0x80D6FF) },
+      std::array<glm::vec3, 4>{ hexToColor(0x80D6FF), hexToColor(0xEDF798), hexToColor(0xFAB57A), hexToColor(0xF06868) },
+      std::array<glm::vec3, 4>{ hexToColor(0x0CECDD), hexToColor(0xFFF338), hexToColor(0xFF67E7), hexToColor(0xC400FF) },
+      std::array<glm::vec3, 4>{ hexToColor(0xC400FF), hexToColor(0xFF67E7), hexToColor(0xFFF338), hexToColor(0x0CECDD) },
+      std::array<glm::vec3, 4>{ hexToColor(0x0F0766), hexToColor(0x59057B), hexToColor(0xAB0E86), hexToColor(0xE01171) },
+      std::array<glm::vec3, 4>{ hexToColor(0xE01171), hexToColor(0xAB0E86), hexToColor(0x59057B), hexToColor(0x0F0766) },
+      std::array<glm::vec3, 4>{ hexToColor(0x00E0FF), hexToColor(0x74F9FF), hexToColor(0xA6FFF2), hexToColor(0xE8FFE8) },
+      std::array<glm::vec3, 4>{ hexToColor(0xE8FFE8), hexToColor(0xA6FFF2), hexToColor(0x74F9FF), hexToColor(0x00E0FF) }
+   };
 
    loadQuad();
    loadCube();
@@ -92,12 +119,7 @@ void DecalRenderer::renderDecals(const glm::mat4& viewMatrix, const glm::mat4& p
    mDecalShader->setUniformBool("displayDiscardedDecalParts", displayDiscardedDecalParts);
 
    renderAnimatedDecals(mShrinkingDecals);
-
-   mDecalTexture->bind(2, mDecalShader->getUniformLocation("decalTex"));
-   mDecalShader->setUniformBool("animated", false);
    renderStableDecals();
-   mDecalTexture->unbind(2);
-
    renderAnimatedDecals(mGrowingDecals);
 
    glActiveTexture(GL_TEXTURE1);
@@ -178,8 +200,9 @@ void DecalRenderer::resizeTextures(unsigned int widthOfFramebuffer, unsigned int
 void DecalRenderer::addDecal(const glm::vec3& decalPosition, const glm::vec3& decalNormal)
 {
    Transform modelTransform(decalPosition, Q::lookRotation(decalNormal, glm::vec3(0.0f, 1.0f, 0.0f)), glm::vec3(1.0f, 1.0f, 1.0f));
-   mDecals.emplace_back(modelTransform, decalNormal);
+   mDecals.emplace_back(modelTransform, decalNormal, mDecalIndex);
    mGrowingDecals.push_back(std::prev(mDecals.end()));
+   mDecalIndex = (mDecalIndex + 1) % 20;
 }
 
 void DecalRenderer::updateDecals()
@@ -307,7 +330,7 @@ void DecalRenderer::composeShrinkAnimation()
    frame0.mTime        = 0.0f;
    frame0.mInSlope[0]  = 0.0f;
    frame0.mValue[0]    = 1.0f;
-   frame0.mOutSlope[0] = 4.5f;
+   frame0.mOutSlope[0] = 0.0f;
 
    // Frame 1
    ScalarFrame& frame1 = mShrinkAnimation.GetFrame(1);
@@ -337,7 +360,7 @@ void DecalRenderer::updateGrowingDecals()
 
 void DecalRenderer::updateStableDecals()
 {
-   int numDecalsToStartShrinking = static_cast<int>(mStableDecals.size()) - 5;
+   int numDecalsToStartShrinking = static_cast<int>(mStableDecals.size()) - 100;
    if (numDecalsToStartShrinking > 0)
    {
       for (int i = 0; i < numDecalsToStartShrinking; ++i)
@@ -379,7 +402,7 @@ void DecalRenderer::renderAnimatedDecals(const std::deque<std::list<Decal>::iter
          mDecalShader->setUniformMat4("model", decalIter->getCircleModelMatrices()[i]);
          mDecalShader->setUniformMat4("inverseModel", decalIter->getCircleInverseModelMatrices()[i]);
          mCircleTextures[i]->bind(2, mDecalShader->getUniformLocation("decalTex"));
-         mDecalShader->setUniformVec3("decalColor", mCircleColors[i]);
+         mDecalShader->setUniformVec3("decalColor", mCircleColors[decalIter->getDecalIndex()][i]);
 
          // Loop over the cube meshes and render each one
          for (unsigned int meshIndex = 0,
@@ -397,10 +420,12 @@ void DecalRenderer::renderAnimatedDecals(const std::deque<std::list<Decal>::iter
 
 void DecalRenderer::renderStableDecals()
 {
+   mDecalShader->setUniformBool("animated", false);
    for (const std::list<Decal>::iterator& decalIter : mStableDecals)
    {
       mDecalShader->setUniformMat4("model", decalIter->getModelMatrix());
       mDecalShader->setUniformMat4("inverseModel", decalIter->getInverseModelMatrix());
+      mDecalTextures[decalIter->getDecalIndex()]->bind(2, mDecalShader->getUniformLocation("decalTex"));
       mDecalShader->setUniformVec3("decalNormal", decalIter->getNormal());
 
       // Loop over the cube meshes and render each one
@@ -411,6 +436,8 @@ void DecalRenderer::renderStableDecals()
       {
          mCubeMeshes[meshIndex].Render();
       }
+
+      mCircleTextures[decalIter->getDecalIndex()]->unbind(2);
    }
 }
 
