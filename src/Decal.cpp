@@ -6,44 +6,50 @@ Decal::Decal(const Transform& modelTransform, const glm::vec3& normal)
    , mInverseModelMatrix()
    , mNormal(normal)
    , mPlaybackTime(0.0f)
-   , mGrowingModelTransforms({modelTransform, modelTransform, modelTransform, modelTransform})
-   , mGrowingModelMatrices()
-   , mGrowingInverseModelMatrices()
-   , mGrowingPlaybackTimes({0.0f, -0.1f, -0.2f, -0.3f})
+   , mCircleModelTransforms({modelTransform, modelTransform, modelTransform, modelTransform})
+   , mCircleModelMatrices()
+   , mCircleInverseModelMatrices()
+   , mCirclePlaybackTimes({0.0f, -0.1f, -0.2f, -0.3f})
 {
 
 }
 
 bool Decal::grow(const ScalarTrack& growAnimation)
 {
+   // Increase the playback times
    for (int i = 0; i < 4; ++i)
    {
-      mGrowingPlaybackTimes[i] += 0.025f;
+      mCirclePlaybackTimes[i] += 0.025f;
    }
 
-   if (mGrowingPlaybackTimes[3] >= 1.0f)
+   // Once the smallest circle completes its animation we switch to the stable state
+   if (mCirclePlaybackTimes[3] >= 1.0f)
    {
       for (int i = 0; i < 4; ++i)
       {
-         float scalingFactor              = growAnimation.Sample(mGrowingPlaybackTimes[i], false);
-         mGrowingModelTransforms[i].scale = glm::vec3(scalingFactor, scalingFactor, 1.0f);
-         mGrowingModelMatrices[i]         = transformToMat4(mGrowingModelTransforms[i]);
-         mGrowingInverseModelMatrices[i]  = glm::inverse(mGrowingModelMatrices[i]);
+         float scalingFactor             = growAnimation.Sample(mCirclePlaybackTimes[i], false);
+         mCircleModelTransforms[i].scale = glm::vec3(scalingFactor, scalingFactor, 1.0f);
+         mCircleModelMatrices[i]         = transformToMat4(mCircleModelTransforms[i]);
+         mCircleInverseModelMatrices[i]  = glm::inverse(mCircleModelMatrices[i]);
       }
 
-      mModelTransform     = mGrowingModelTransforms[0];
+      // Set the values that will be used in the stable state
+      mModelTransform     = mCircleModelTransforms[0];
       mModelMatrix        = transformToMat4(mModelTransform);
       mInverseModelMatrix = glm::inverse(mModelMatrix);
+
+      // Set the values that will be used in the shrinking state
+      mCirclePlaybackTimes = {-0.3f, -0.2f, -0.1f, 0.0f};
 
       return true;
    }
 
    for (int i = 0; i < 4; ++i)
    {
-      float scalingFactor              = growAnimation.Sample(mGrowingPlaybackTimes[i], false);
-      mGrowingModelTransforms[i].scale = glm::vec3(scalingFactor, scalingFactor, 1.0f);
-      mGrowingModelMatrices[i]         = transformToMat4(mGrowingModelTransforms[i]);
-      mGrowingInverseModelMatrices[i]  = glm::inverse(mGrowingModelMatrices[i]);
+      float scalingFactor             = growAnimation.Sample(mCirclePlaybackTimes[i], false);
+      mCircleModelTransforms[i].scale = glm::vec3(scalingFactor, scalingFactor, 1.0f);
+      mCircleModelMatrices[i]         = transformToMat4(mCircleModelTransforms[i]);
+      mCircleInverseModelMatrices[i]  = glm::inverse(mCircleModelMatrices[i]);
    }
 
    return false;
@@ -51,22 +57,33 @@ bool Decal::grow(const ScalarTrack& growAnimation)
 
 bool Decal::shrink(const ScalarTrack& shrinkAnimation)
 {
-   mPlaybackTime += 0.025f;
-
-   if (mPlaybackTime >= 1.0f)
+   // Increase the playback times
+   for (int i = 0; i < 4; ++i)
    {
-      float scalingFactor   = shrinkAnimation.Sample(mPlaybackTime, false);
-      mModelTransform.scale = glm::vec3(scalingFactor, scalingFactor, 1.0f);
-      mModelMatrix          = transformToMat4(mModelTransform);
-      mInverseModelMatrix   = glm::inverse(mModelMatrix);
+      mCirclePlaybackTimes[i] += 0.025f;
+   }
+
+   // Once the biggest circle completes its animation we switch to the stable state
+   if (mCirclePlaybackTimes[0] >= 1.0f)
+   {
+      for (int i = 0; i < 4; ++i)
+      {
+         float scalingFactor             = shrinkAnimation.Sample(mCirclePlaybackTimes[i], false);
+         mCircleModelTransforms[i].scale = glm::vec3(scalingFactor, scalingFactor, 1.0f);
+         mCircleModelMatrices[i]         = transformToMat4(mCircleModelTransforms[i]);
+         mCircleInverseModelMatrices[i]  = glm::inverse(mCircleModelMatrices[i]);
+      }
 
       return true;
    }
 
-   float scalingFactor   = shrinkAnimation.Sample(mPlaybackTime, false);
-   mModelTransform.scale = glm::vec3(scalingFactor, scalingFactor, 1.0f);
-   mModelMatrix          = transformToMat4(mModelTransform);
-   mInverseModelMatrix   = glm::inverse(mModelMatrix);
+   for (int i = 0; i < 4; ++i)
+   {
+      float scalingFactor             = shrinkAnimation.Sample(mCirclePlaybackTimes[i], false);
+      mCircleModelTransforms[i].scale = glm::vec3(scalingFactor, scalingFactor, 1.0f);
+      mCircleModelMatrices[i]         = transformToMat4(mCircleModelTransforms[i]);
+      mCircleInverseModelMatrices[i]  = glm::inverse(mCircleModelMatrices[i]);
+   }
 
    return false;
 }

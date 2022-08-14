@@ -47,8 +47,8 @@ private:
    void         updateStableDecals();
    void         updateShrinkingDecals();
 
-   void         renderGrowingDecals();
-   void         renderDecals(const std::deque<std::list<Decal>::iterator>& decals);
+   void         renderAnimatedDecals(const std::deque<std::list<Decal>::iterator>& decals);
+   void         renderStableDecals();
 
    glm::vec3    hexToColor(int hex);
 

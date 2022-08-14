@@ -20,8 +20,8 @@ public:
    const glm::mat4&                getInverseModelMatrix() const { return mInverseModelMatrix; }
    const glm::vec3&                getNormal() const { return mNormal; }
 
-   const std::array<glm::mat4, 4>& getCircleModelMatrices() const { return mGrowingModelMatrices; }
-   const std::array<glm::mat4, 4>& getCircleInverseModelMatrices() const { return mGrowingInverseModelMatrices; }
+   const std::array<glm::mat4, 4>& getCircleModelMatrices() const { return mCircleModelMatrices; }
+   const std::array<glm::mat4, 4>& getCircleInverseModelMatrices() const { return mCircleInverseModelMatrices; }
 
 private:
 
@@ -31,10 +31,10 @@ private:
    glm::vec3                mNormal;
    float                    mPlaybackTime;
 
-   std::array<Transform, 4> mGrowingModelTransforms;
-   std::array<glm::mat4, 4> mGrowingModelMatrices;
-   std::array<glm::mat4, 4> mGrowingInverseModelMatrices;
-   std::array<float, 4>     mGrowingPlaybackTimes;
+   std::array<Transform, 4> mCircleModelTransforms;
+   std::array<glm::mat4, 4> mCircleModelMatrices;
+   std::array<glm::mat4, 4> mCircleInverseModelMatrices;
+   std::array<float, 4>     mCirclePlaybackTimes;
 };
 
 #endif

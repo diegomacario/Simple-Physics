@@ -87,19 +87,18 @@ void DecalRenderer::renderDecals(const glm::mat4& viewMatrix, const glm::mat4& p
    glBindTexture(GL_TEXTURE_2D, mDepthTexture);
    mDecalShader->setUniformInt("depthTex", 1);
 
-   mDecalTexture->bind(2, mDecalShader->getUniformLocation("decalTex"));
-
    mDecalShader->setUniformFloat("normalThreshold", mNormalThreshold);
    mDecalShader->setUniformBool("displayDecalOBBs", displayDecalOBBs);
    mDecalShader->setUniformBool("displayDiscardedDecalParts", displayDiscardedDecalParts);
 
-   mDecalShader->setUniformBool("growing", false);
-   renderDecals(mShrinkingDecals);
-   renderDecals(mStableDecals);
+   renderAnimatedDecals(mShrinkingDecals);
 
+   mDecalTexture->bind(2, mDecalShader->getUniformLocation("decalTex"));
+   mDecalShader->setUniformBool("animated", false);
+   renderStableDecals();
    mDecalTexture->unbind(2);
 
-   renderGrowingDecals();
+   renderAnimatedDecals(mGrowingDecals);
 
    glActiveTexture(GL_TEXTURE1);
    glBindTexture(GL_TEXTURE_2D, 0);
@@ -368,10 +367,10 @@ void DecalRenderer::updateShrinkingDecals()
    }
 }
 
-void DecalRenderer::renderGrowingDecals()
+void DecalRenderer::renderAnimatedDecals(const std::deque<std::list<Decal>::iterator>& decals)
 {
-   mDecalShader->setUniformBool("growing", true);
-   for (const std::list<Decal>::iterator& decalIter : mGrowingDecals)
+   mDecalShader->setUniformBool("animated", true);
+   for (const std::list<Decal>::iterator& decalIter : decals)
    {
       mDecalShader->setUniformVec3("decalNormal", decalIter->getNormal());
 
@@ -396,9 +395,9 @@ void DecalRenderer::renderGrowingDecals()
    }
 }
 
-void DecalRenderer::renderDecals(const std::deque<std::list<Decal>::iterator>& decals)
+void DecalRenderer::renderStableDecals()
 {
-   for (const std::list<Decal>::iterator& decalIter : decals)
+   for (const std::list<Decal>::iterator& decalIter : mStableDecals)
    {
       mDecalShader->setUniformMat4("model", decalIter->getModelMatrix());
       mDecalShader->setUniformMat4("inverseModel", decalIter->getInverseModelMatrix());
