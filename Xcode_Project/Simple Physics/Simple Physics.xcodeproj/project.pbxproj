@@ -16,6 +16,9 @@
 		043A2D7F2847F1B0001E6F77 /* imgui_tables.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 043A2D7E2847F1B0001E6F77 /* imgui_tables.cpp */; };
 		043A2D812848E0C7001E6F77 /* lglfw3.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 043A2D802848E0C7001E6F77 /* lglfw3.a */; };
 		0478B02328A0000E005BA345 /* Decal.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0478B02228A0000E005BA345 /* Decal.cpp */; };
+		0491214E28AD171600C23363 /* Triangle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0491214D28AD171600C23363 /* Triangle.cpp */; };
+		0491215128AD177400C23363 /* Ray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0491215028AD177400C23363 /* Ray.cpp */; };
+		0491215428AD19B600C23363 /* SimpleMesh.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0491215328AD19B600C23363 /* SimpleMesh.cpp */; };
 		04B904A32847E1C800FF56D3 /* Track.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 04B9049B2847E1C800FF56D3 /* Track.cpp */; };
 		04B904B32847E22700FF56D3 /* Camera3.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 04B904A42847E22700FF56D3 /* Camera3.cpp */; };
 		04B904B42847E22700FF56D3 /* TextureLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 04B904A52847E22700FF56D3 /* TextureLoader.cpp */; };
@@ -70,6 +73,12 @@
 		043A2D802848E0C7001E6F77 /* lglfw3.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = lglfw3.a; path = ../../dependencies/GLFW/GLFW/lib/mac/lglfw3.a; sourceTree = "<group>"; };
 		0478B021289FFFE5005BA345 /* Decal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Decal.h; path = ../../inc/Decal.h; sourceTree = "<group>"; };
 		0478B02228A0000E005BA345 /* Decal.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Decal.cpp; path = ../../src/Decal.cpp; sourceTree = "<group>"; };
+		0491214C28AD168C00C23363 /* Triangle.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Triangle.h; path = ../../inc/Triangle.h; sourceTree = "<group>"; };
+		0491214D28AD171600C23363 /* Triangle.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Triangle.cpp; path = ../../src/Triangle.cpp; sourceTree = "<group>"; };
+		0491214F28AD175D00C23363 /* Ray.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Ray.h; path = ../../inc/Ray.h; sourceTree = "<group>"; };
+		0491215028AD177400C23363 /* Ray.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Ray.cpp; path = ../../src/Ray.cpp; sourceTree = "<group>"; };
+		0491215228AD199E00C23363 /* SimpleMesh.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SimpleMesh.h; path = ../../inc/SimpleMesh.h; sourceTree = "<group>"; };
+		0491215328AD19B600C23363 /* SimpleMesh.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = SimpleMesh.cpp; path = ../../src/SimpleMesh.cpp; sourceTree = "<group>"; };
 		04B9046E2847A50E00FF56D3 /* Simple Physics */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "Simple Physics"; sourceTree = BUILT_PRODUCTS_DIR; };
 		04B9049B2847E1C800FF56D3 /* Track.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Track.cpp; path = ../../src/Track.cpp; sourceTree = "<group>"; };
 		04B904A42847E22700FF56D3 /* Camera3.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Camera3.cpp; path = ../../src/Camera3.cpp; sourceTree = "<group>"; };
@@ -139,6 +148,8 @@
 				041C949D28941EC000781DEC /* World.h */,
 				041C949E28941F6800781DEC /* RigidBody.h */,
 				041C94A328946AE900781DEC /* Wall.h */,
+				0491214C28AD168C00C23363 /* Triangle.h */,
+				0491214F28AD175D00C23363 /* Ray.h */,
 			);
 			name = Physics;
 			sourceTree = "<group>";
@@ -149,6 +160,8 @@
 				041C949F28941FEE00781DEC /* World.cpp */,
 				041C94A12894202800781DEC /* RigidBody.cpp */,
 				041C94A428946B0900781DEC /* Wall.cpp */,
+				0491214D28AD171600C23363 /* Triangle.cpp */,
+				0491215028AD177400C23363 /* Ray.cpp */,
 			);
 			name = Physics;
 			sourceTree = "<group>";
@@ -223,6 +236,7 @@
 				04B904A62847E22700FF56D3 /* Window.cpp */,
 				041C94A728983DDC00781DEC /* DecalRenderer.cpp */,
 				0478B02228A0000E005BA345 /* Decal.cpp */,
+				0491215328AD19B600C23363 /* SimpleMesh.cpp */,
 			);
 			name = Base;
 			sourceTree = "<group>";
@@ -271,6 +285,7 @@
 				04B904EB2847E7E000FF56D3 /* Window.h */,
 				041C94A628983DBF00781DEC /* DecalRenderer.h */,
 				0478B021289FFFE5005BA345 /* Decal.h */,
+				0491215228AD199E00C23363 /* SimpleMesh.h */,
 			);
 			name = Base;
 			sourceTree = "<group>";
@@ -404,11 +419,13 @@
 				04B904B52847E22700FF56D3 /* Window.cpp in Sources */,
 				043A2D7F2847F1B0001E6F77 /* imgui_tables.cpp in Sources */,
 				04B9052D2847F04E00FF56D3 /* imgui.cpp in Sources */,
+				0491215128AD177400C23363 /* Ray.cpp in Sources */,
 				041C94A22894202800781DEC /* RigidBody.cpp in Sources */,
 				04B9050F2847EC1C00FF56D3 /* glad.c in Sources */,
 				04B9052C2847F04E00FF56D3 /* imgui_demo.cpp in Sources */,
 				04B905112847EC3100FF56D3 /* cgltf.c in Sources */,
 				04B9052E2847F04E00FF56D3 /* imgui_impl_glfw.cpp in Sources */,
+				0491215428AD19B600C23363 /* SimpleMesh.cpp in Sources */,
 				04B9050D2847EC0D00FF56D3 /* stb_image.cpp in Sources */,
 				04B904DA2847E2BB00FF56D3 /* Transform.cpp in Sources */,
 				0478B02328A0000E005BA345 /* Decal.cpp in Sources */,
@@ -428,6 +445,7 @@
 				04B904BE2847E22700FF56D3 /* FiniteStateMachine.cpp in Sources */,
 				04B904A32847E1C800FF56D3 /* Track.cpp in Sources */,
 				04B904B32847E22700FF56D3 /* Camera3.cpp in Sources */,
+				0491214E28AD171600C23363 /* Triangle.cpp in Sources */,
 				04B904BB2847E22700FF56D3 /* Texture.cpp in Sources */,
 				04B904BD2847E22700FF56D3 /* ShaderLoader.cpp in Sources */,
 			);

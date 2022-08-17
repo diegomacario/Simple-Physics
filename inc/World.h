@@ -3,6 +3,8 @@
 
 #include <vector>
 
+#include "Triangle.h"
+#include "SimpleMesh.h"
 #include "RigidBody.h"
 #include "Wall.h"
 #include "DecalRenderer.h"
@@ -41,6 +43,8 @@ private:
    void                          resolveCollisions();
 
    void                          orthonormalizeOrientation(glm::mat3& orientation);
+
+   std::vector<Triangle>         getTrianglesFromMeshes(std::vector<SimpleMesh>& meshes, int index);
 
    std::vector<RigidBody>         mRigidBodies;
    std::vector<Wall>              mWalls;

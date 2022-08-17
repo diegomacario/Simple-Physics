@@ -19,10 +19,10 @@ public:
    AnimatedMesh(AnimatedMesh&& rhs) noexcept;
    AnimatedMesh& operator=(AnimatedMesh&& rhs) noexcept;
 
-   std::vector<glm::vec3>&    GetPositions()  { return mPositions;  }
-   std::vector<glm::vec3>&    GetNormals()    { return mNormals;    }
-   std::vector<glm::vec2>&    GetTexCoords()  { return mTexCoords;  }
-   std::vector<unsigned int>& GetIndices()    { return mIndices;    }
+   std::vector<glm::vec3>&    GetPositions()  { return mPositions; }
+   std::vector<glm::vec3>&    GetNormals()    { return mNormals;   }
+   std::vector<glm::vec2>&    GetTexCoords()  { return mTexCoords; }
+   std::vector<unsigned int>& GetIndices()    { return mIndices;   }
 
    void                       LoadBuffers();
    void                       ClearMeshData();
