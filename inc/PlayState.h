@@ -60,8 +60,11 @@ private:
    std::shared_ptr<Texture>               mCubeTexture;
    std::vector<AnimatedMesh>              mPlaneMeshes;
    std::shared_ptr<Texture>               mPlaneTexture;
+   std::vector<AnimatedMesh>              mInvertedCubeMeshes;
+   std::shared_ptr<Texture>               mInvertedCubeTexture;
    std::vector<AnimatedMesh>              mNormalCubeMeshes;
    std::vector<AnimatedMesh>              mNormalPlaneMeshes;
+   std::vector<AnimatedMesh>              mNormalInvertedCubeMeshes;
 
    std::shared_ptr<DecalRenderer>         mDecalRenderer;
 

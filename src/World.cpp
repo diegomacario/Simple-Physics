@@ -21,6 +21,7 @@ void World::initializeRigidBodies()
    Transform orientation(glm::vec3(0.0f), Q::angleAxis(glm::radians(45.0f), glm::vec3(0.0f, 0.0f, 1.0f)), glm::vec3(1.0f));
    //orientation = combine(orientation, Transform(glm::vec3(0.0f), Q::angleAxis(glm::radians(65.0f), glm::vec3(0.0f, 1.0f, 0.0f)), glm::vec3(1.0f)));
 
+   /*
    mRigidBodies.emplace_back(1.0f, // Mass
                              0.5f, // Width
                              0.25f, // Height
@@ -29,6 +30,17 @@ void World::initializeRigidBodies()
                              glm::vec3(0.0f, 0.0f, 0.0f), // Position of CM
                              glm::mat3(transformToMat4(orientation)), // Orientation
                              glm::vec3(-1.0f, -1.0f, -1.0f), // Velocity of CM,
+                             glm::vec3(0.0f)); // Angular momentum
+    */
+
+   mRigidBodies.emplace_back(1.0f, // Mass
+                             1.0f, // Width
+                             1.0f, // Height
+                             1.0f, // Depth
+                             1.0f, // Coefficient of restitution
+                             glm::vec3(0.0f, 0.0f, 0.0f), // Position of CM
+                             glm::mat3(1.0f), // Orientation
+                             glm::vec3(0.0f, 0.0f, 0.0f), // Velocity of CM,
                              glm::vec3(0.0f)); // Angular momentum
 }
 
