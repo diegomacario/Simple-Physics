@@ -13,8 +13,8 @@ public:
    Decal(const Transform& modelTransform, const glm::vec3& normal, unsigned int decalIndex);
    ~Decal() = default;
 
-   bool                            grow(const ScalarTrack& growAnimation);
-   bool                            shrink(const ScalarTrack& shrinkAnimation);
+   bool                            grow(const ScalarTrack& growAnimation, float playbackSpeed);
+   bool                            shrink(const ScalarTrack& shrinkAnimation, float playbackSpeed);
 
    const glm::mat4&                getModelMatrix() const { return mModelMatrix; }
    const glm::mat4&                getInverseModelMatrix() const { return mInverseModelMatrix; }

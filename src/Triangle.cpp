@@ -5,7 +5,6 @@ Triangle::Triangle()
    , vertexB(0.0f)
    , vertexC(0.0f)
    , normal(0.0f)
-   , index(0)
 {
 
 }
@@ -14,16 +13,6 @@ Triangle::Triangle(const glm::vec3& vA, const glm::vec3& vB, const glm::vec3& vC
    : vertexA(vA)
    , vertexB(vB)
    , vertexC(vC)
-   , index(0)
-{
-   normal = glm::normalize(glm::cross(vertexB - vertexA, vertexC - vertexA));
-}
-
-Triangle::Triangle(const glm::vec3& vA, const glm::vec3& vB, const glm::vec3& vC, int idx)
-   : vertexA(vA)
-   , vertexB(vB)
-   , vertexC(vC)
-   , index(idx)
 {
    normal = glm::normalize(glm::cross(vertexB - vertexA, vertexC - vertexA));
 }

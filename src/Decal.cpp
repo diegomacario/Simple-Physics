@@ -15,12 +15,12 @@ Decal::Decal(const Transform& modelTransform, const glm::vec3& normal, unsigned 
 
 }
 
-bool Decal::grow(const ScalarTrack& growAnimation)
+bool Decal::grow(const ScalarTrack& growAnimation, float playbackSpeed)
 {
    // Increase the playback times
    for (int i = 0; i < 4; ++i)
    {
-      mCirclePlaybackTimes[i] += 0.025f;
+      mCirclePlaybackTimes[i] += 0.025f * playbackSpeed;
    }
 
    // Once the smallest circle completes its animation we switch to the stable state
@@ -56,12 +56,12 @@ bool Decal::grow(const ScalarTrack& growAnimation)
    return false;
 }
 
-bool Decal::shrink(const ScalarTrack& shrinkAnimation)
+bool Decal::shrink(const ScalarTrack& shrinkAnimation, float playbackSpeed)
 {
    // Increase the playback times
    for (int i = 0; i < 4; ++i)
    {
-      mCirclePlaybackTimes[i] += 0.025f;
+      mCirclePlaybackTimes[i] += 0.025f * playbackSpeed;
    }
 
    // Once the biggest circle completes its animation we switch to the stable state

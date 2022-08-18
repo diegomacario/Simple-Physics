@@ -44,7 +44,7 @@ private:
    void resetCamera();
 
    void renderRigidBodies();
-   void renderWalls();
+   void renderWorld();
    void renderNormalsAndDepth();
 
    std::shared_ptr<FiniteStateMachine>    mFSM;

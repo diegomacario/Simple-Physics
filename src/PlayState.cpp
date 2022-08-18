@@ -104,7 +104,7 @@ void PlayState::update(float deltaTime)
    // TODO: Handle simulation errors
    mWorld.simulate(deltaTime * mSelectedPlaybackSpeed);
 
-   mDecalRenderer->updateDecals();
+   mDecalRenderer->updateDecals(mSelectedPlaybackSpeed);
 }
 
 void PlayState::render()
@@ -132,7 +132,7 @@ void PlayState::render()
 
    if (mDisplayMode == 0) // Final
    {
-      renderWalls();
+      renderWorld();
       glDisable(GL_DEPTH_TEST);
       glEnable(GL_BLEND);
       mDecalRenderer->renderDecals(mCamera3.getViewMatrix(), mCamera3.getPerspectiveProjectionMatrix(), mDisplayDecalOBBs, mDisplayDiscardedDecalParts);
@@ -344,7 +344,7 @@ void PlayState::renderRigidBodies()
    mDiffuseShader->use(false);
 }
 
-void PlayState::renderWalls()
+void PlayState::renderWorld()
 {
    mDiffuseShader->use(true);
    mDiffuseShader->setUniformMat4("model",      glm::mat4(1.0f));

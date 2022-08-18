@@ -205,11 +205,11 @@ void DecalRenderer::addDecal(const glm::vec3& decalPosition, const glm::vec3& de
    mDecalIndex = (mDecalIndex + 1) % 20;
 }
 
-void DecalRenderer::updateDecals()
+void DecalRenderer::updateDecals(float playbackSpeed)
 {
-   updateGrowingDecals();
+   updateGrowingDecals(playbackSpeed);
    updateStableDecals();
-   updateShrinkingDecals();
+   updateShrinkingDecals(playbackSpeed);
 }
 
 void DecalRenderer::configureDecalFBO()
@@ -340,12 +340,12 @@ void DecalRenderer::composeShrinkAnimation()
    frame1.mOutSlope[0] = 0.0f;
 }
 
-void DecalRenderer::updateGrowingDecals()
+void DecalRenderer::updateGrowingDecals(float playbackSpeed)
 {
    unsigned int numDecalsDoneGrowing = 0;
    for (const std::list<Decal>::iterator& growingDecalIter : mGrowingDecals)
    {
-      if (growingDecalIter->grow(mGrowAnimation))
+      if (growingDecalIter->grow(mGrowAnimation, playbackSpeed))
       {
          mStableDecals.push_back(growingDecalIter);
          ++numDecalsDoneGrowing;
@@ -372,12 +372,12 @@ void DecalRenderer::updateStableDecals()
    }
 }
 
-void DecalRenderer::updateShrinkingDecals()
+void DecalRenderer::updateShrinkingDecals(float playbackSpeed)
 {
    unsigned int numDecalsDoneShrinking = 0;
    for (const std::list<Decal>::iterator& shrinkingDecalIter : mShrinkingDecals)
    {
-      if (shrinkingDecalIter->shrink(mShrinkAnimation))
+      if (shrinkingDecalIter->shrink(mShrinkAnimation, playbackSpeed))
       {
          ++numDecalsDoneShrinking;
       }

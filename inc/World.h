@@ -6,7 +6,6 @@
 #include "Triangle.h"
 #include "SimpleMesh.h"
 #include "RigidBody.h"
-#include "Wall.h"
 #include "DecalRenderer.h"
 
 class World
@@ -17,12 +16,11 @@ public:
    ~World() = default;
 
    void                          initializeRigidBodies();
-   void                          initializeWalls();
+   void                          initializeWorldTriangles();
 
    bool                          simulate(float deltaTime);
 
    const std::vector<RigidBody>& getRigidBodies() const { return mRigidBodies; };
-   const std::vector<Wall>&      getWalls() const { return mWalls; };
 
 private:
 
@@ -44,10 +42,10 @@ private:
 
    void                          orthonormalizeOrientation(glm::mat3& orientation);
 
-   std::vector<Triangle>         getTrianglesFromMeshes(std::vector<SimpleMesh>& meshes, int index);
+   std::vector<Triangle>         getTrianglesFromMeshes(std::vector<SimpleMesh>& meshes);
 
    std::vector<RigidBody>         mRigidBodies;
-   std::vector<Wall>              mWalls;
+   std::vector<Triangle>          mWorldTriangles;
 
    CollisionState                 mCollisionState;
    int                            mCollidingRigidBodyIndex;

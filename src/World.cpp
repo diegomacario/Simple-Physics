@@ -1,11 +1,12 @@
 #include <glm/gtx/matrix_cross_product.hpp>
 
 #include "Transform.h"
+#include "GLTFLoader.h"
 #include "World.h"
 
 World::World(const std::shared_ptr<DecalRenderer>& decalRenderer)
    : mRigidBodies()
-   , mWalls()
+   , mWorldTriangles()
    , mCollisionState(CollisionState::clear)
    , mCollidingRigidBodyIndex(-1)
    , mCollidingVertexIndex(-1)
@@ -13,7 +14,7 @@ World::World(const std::shared_ptr<DecalRenderer>& decalRenderer)
    , mDecalRenderer(decalRenderer)
 {
    initializeRigidBodies();
-   initializeWalls();
+   initializeWorldTriangles();
 }
 
 void World::initializeRigidBodies()
@@ -21,7 +22,6 @@ void World::initializeRigidBodies()
    Transform orientation(glm::vec3(0.0f), Q::angleAxis(glm::radians(45.0f), glm::vec3(0.0f, 0.0f, 1.0f)), glm::vec3(1.0f));
    //orientation = combine(orientation, Transform(glm::vec3(0.0f), Q::angleAxis(glm::radians(65.0f), glm::vec3(0.0f, 1.0f, 0.0f)), glm::vec3(1.0f)));
 
-   /*
    mRigidBodies.emplace_back(1.0f, // Mass
                              0.5f, // Width
                              0.25f, // Height
@@ -31,44 +31,15 @@ void World::initializeRigidBodies()
                              glm::mat3(transformToMat4(orientation)), // Orientation
                              glm::vec3(-1.0f, -1.0f, -1.0f), // Velocity of CM,
                              glm::vec3(0.0f)); // Angular momentum
-    */
-
-   mRigidBodies.emplace_back(1.0f, // Mass
-                             1.0f, // Width
-                             1.0f, // Height
-                             1.0f, // Depth
-                             1.0f, // Coefficient of restitution
-                             glm::vec3(0.0f, 0.0f, 0.0f), // Position of CM
-                             glm::mat3(1.0f), // Orientation
-                             glm::vec3(0.0f, 0.0f, 0.0f), // Velocity of CM,
-                             glm::vec3(0.0f)); // Angular momentum
 }
 
-void World::initializeWalls()
+void World::initializeWorldTriangles()
 {
-   // Right
-   glm::mat3 orientation = glm::mat3(Q::quatToMat4(Q::lookRotation(glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f))));
-   mWalls.emplace_back(glm::vec3(2.5f * 0.5f, 0.0f, 0.0f), orientation, 2.5f, 2.5f);
+   cgltf_data* data = LoadGLTFFile("resources/models/inverted_cube/inverted_cube.glb");
+   std::vector<SimpleMesh> worldMeshes = LoadSimpleMeshes(data);
+   FreeGLTFFile(data);
 
-   // Left
-   orientation = glm::mat3(Q::quatToMat4(Q::lookRotation(glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f))));
-   mWalls.emplace_back(glm::vec3(-2.5f * 0.5f, 0.0f, 0.0f), orientation, 2.5f, 2.5f);
-
-   // Front
-   orientation = glm::mat3(Q::quatToMat4(Q::lookRotation(glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f, 0.0f))));
-   mWalls.emplace_back(glm::vec3(0.0f, 0.0f, 2.5f * 0.5f), orientation, 2.5f, 2.5f);
-
-   // Back
-   orientation = glm::mat3(Q::quatToMat4(Q::lookRotation(glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f))));
-   mWalls.emplace_back(glm::vec3(0.0f, 0.0f, -2.5f * 0.5f), orientation, 2.5f, 2.5f);
-
-   // Top
-   orientation = glm::mat3(Q::quatToMat4(Q::lookRotation(glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f))));
-   mWalls.emplace_back(glm::vec3(0.0f, 2.5f * 0.5f, 0.0f), orientation, 2.5f, 2.5f);
-
-   // Bottom
-   orientation = glm::mat3(Q::quatToMat4(Q::lookRotation(glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f))));
-   mWalls.emplace_back(glm::vec3(0.0f, -2.5f * 0.5f, 0.0f), orientation, 2.5f, 2.5f);
+   mWorldTriangles = getTrianglesFromMeshes(worldMeshes);
 }
 
 bool World::simulate(float deltaTime)
@@ -295,26 +266,26 @@ World::CollisionState World::checkForCollisions()
          glm::vec3 cmToVertex = vertexPos - dynamicAndKinematicState.positionOfCM;
          glm::vec3 velocity   = dynamicAndKinematicState.velocityOfCM + glm::cross(dynamicAndKinematicState.angularVelocity, cmToVertex);
 
-         for (int wallIndex = 0; (wallIndex < mWalls.size()) && (mCollisionState != CollisionState::penetrating); wallIndex++)
+         for (int triangleIndex = 0; (triangleIndex < mWorldTriangles.size()) && (mCollisionState != CollisionState::penetrating); triangleIndex++)
          {
-            Wall& wall = mWalls[wallIndex];
+            Triangle& triangle = mWorldTriangles[triangleIndex];
 
-            // For a point in space P0, a plane with normal N and a point on the plane P1,
-            // the distance between P0 and the plane is given by the projection of (P0 - P1) onto N
-            float distBetweenVertexAndWall = glm::dot(vertexPos, wall.getNormal()) + wall.getD();
-            if (distBetweenVertexAndWall < -depthEpsilon)
+            // For a point in space P0, a triangle with normal N and a point on the triangle P1,
+            // the distance between P0 and the triangle is given by the projection of (P0 - P1) onto N
+            float distBetweenVertexAndTriangle = glm::dot(vertexPos, triangle.normal) - glm::dot(triangle.normal, triangle.vertexA);
+            if (distBetweenVertexAndTriangle < -depthEpsilon)
             {
                mCollisionState = CollisionState::penetrating;
             }
-            else if (distBetweenVertexAndWall < depthEpsilon)
+            else if (distBetweenVertexAndTriangle < depthEpsilon)
             {
-               float relativeVelocity = glm::dot(wall.getNormal(), velocity);
+               float relativeVelocity = glm::dot(triangle.normal, velocity);
                if (relativeVelocity < 0.0f)
                {
                   mCollisionState          = CollisionState::colliding;
                   mCollidingRigidBodyIndex = rigidBodyIndex;
                   mCollidingVertexIndex    = vertexIndex;
-                  mCollisionNormal         = wall.getNormal();
+                  mCollisionNormal         = triangle.normal;
 
                   if (mFirstCheckForCollisions)
                   {
@@ -382,7 +353,7 @@ void World::orthonormalizeOrientation(glm::mat3& orientation)
    orientation[2][2] = zAxis[2];
 }
 
-std::vector<Triangle> World::getTrianglesFromMeshes(std::vector<SimpleMesh>& meshes, int index)
+std::vector<Triangle> World::getTrianglesFromMeshes(std::vector<SimpleMesh>& meshes)
 {
    std::vector<Triangle> triangles;
 
@@ -402,8 +373,7 @@ std::vector<Triangle> World::getTrianglesFromMeshes(std::vector<SimpleMesh>& mes
          {
             triangles.push_back(Triangle(positions[i + 0],
                                          positions[i + 1],
-                                         positions[i + 2],
-                                         index));
+                                         positions[i + 2]));
          }
       }
       else
@@ -414,8 +384,7 @@ std::vector<Triangle> World::getTrianglesFromMeshes(std::vector<SimpleMesh>& mes
          {
             triangles.push_back(Triangle(positions[indices[i + 0]],
                                          positions[indices[i + 1]],
-                                         positions[indices[i + 2]],
-                                         index));
+                                         positions[indices[i + 2]]));
          }
       }
    }

@@ -29,7 +29,7 @@ public:
    void         renderDepthTextureToFullScreenQuad();
    void         resizeTextures(unsigned int widthOfFramebuffer, unsigned int heightOfFramebuffer);
    void         addDecal(const glm::vec3& decalPosition, const glm::vec3& decalNormal);
-   void         updateDecals();
+   void         updateDecals(float playbackSpeed);
 
 private:
 
@@ -43,9 +43,9 @@ private:
    void         composeGrowAnimation();
    void         composeShrinkAnimation();
 
-   void         updateGrowingDecals();
+   void         updateGrowingDecals(float playbackSpeed);
    void         updateStableDecals();
-   void         updateShrinkingDecals();
+   void         updateShrinkingDecals(float playbackSpeed);
 
    void         renderAnimatedDecals(const std::deque<std::list<Decal>::iterator>& decals);
    void         renderStableDecals();

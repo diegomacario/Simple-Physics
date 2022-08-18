@@ -19,7 +19,6 @@ struct Triangle
 {
    Triangle();
    Triangle(const glm::vec3& vA, const glm::vec3& vB, const glm::vec3& vC);
-   Triangle(const glm::vec3& vA, const glm::vec3& vB, const glm::vec3& vC, int idx);
 
    bool  isFrontFacingTo(const glm::vec3& direction) const;
    float signedDistanceTo(const glm::vec3& point) const;
@@ -35,13 +34,6 @@ struct Triangle
    glm::vec3 vertexC;
 
    glm::vec3 normal;
-
-   // This is only needed by the system that detects whether a player is looking at a painting,
-   // and by the system that detects in which zone a player is
-   // It feels wrong to increase the size of all triangles just for those systems,
-   // but this approach helps us avoid a lot of code duplication
-   // TODO: Create a derived class called IndexedTriangle?
-   int       index;
 };
 
 #endif
