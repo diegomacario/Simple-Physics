@@ -24,6 +24,10 @@ PlayState::PlayState(const std::shared_ptr<FiniteStateMachine>& finiteStateMachi
    mDiffuseShader = ResourceManager<Shader>().loadUnmanagedResource<ShaderLoader>("resources/shaders/diffuse.vert",
                                                                                   "resources/shaders/diffuse.frag");
 
+   // Initialize the illuminated shader
+   mIlluminatedShader = ResourceManager<Shader>().loadUnmanagedResource<ShaderLoader>("resources/shaders/illuminated.vert",
+                                                                                      "resources/shaders/illuminated.frag");
+
    // Initialize the normal and depth shader
    mNormalAndDepthShader = ResourceManager<Shader>().loadUnmanagedResource<ShaderLoader>("resources/shaders/normal_and_depth.vert",
                                                                                          "resources/shaders/normal_and_depth.frag");
@@ -191,6 +195,11 @@ void PlayState::loadModels()
    mInvertedCubeMeshes = LoadStaticMeshes(data);
    FreeGLTFFile(data);
 
+   // Load the inverted icosphere
+   data = LoadGLTFFile("resources/models/inverted_icosphere/inverted_icosphere.glb");
+   mInvertedIcosphereMeshes = LoadStaticMeshes(data);
+   FreeGLTFFile(data);
+
    // Load the normal cube
    data = LoadGLTFFile("resources/models/cube/cube.glb");
    mNormalCubeMeshes = LoadStaticMeshes(data);
@@ -204,6 +213,11 @@ void PlayState::loadModels()
    // Load the normal inverted cube
    data = LoadGLTFFile("resources/models/inverted_cube/inverted_cube.glb");
    mNormalInvertedCubeMeshes = LoadStaticMeshes(data);
+   FreeGLTFFile(data);
+
+   // Load the normal inverted icosphere
+   data = LoadGLTFFile("resources/models/inverted_icosphere/inverted_icosphere.glb");
+   mNormalInvertedIcosphereMeshes = LoadStaticMeshes(data);
    FreeGLTFFile(data);
 
    int positionsAttribLoc = mDiffuseShader->getAttributeLocation("position");
@@ -240,6 +254,26 @@ void PlayState::loadModels()
                                           texCoordsAttribLoc);
    }
 
+   positionsAttribLoc = mIlluminatedShader->getAttributeLocation("position");
+   normalsAttribLoc   = mIlluminatedShader->getAttributeLocation("normal");
+   texCoordsAttribLoc = mIlluminatedShader->getAttributeLocation("texCoord");
+
+   for (unsigned int i = 0,
+        size = static_cast<unsigned int>(mInvertedIcosphereMeshes.size());
+        i < size;
+        ++i)
+   {
+      mInvertedIcosphereMeshes[i].ConfigureVAO(positionsAttribLoc,
+                                               normalsAttribLoc,
+                                               texCoordsAttribLoc);
+   }
+
+   mIlluminatedShader->use(true);
+   mIlluminatedShader->setUniformVec3( "light.worldPos",  glm::vec3(0.0f));
+   mIlluminatedShader->setUniformVec3( "light.color",     glm::vec3(1.0f));
+   mIlluminatedShader->setUniformFloat("light.linearAtt", 0.0f);
+   mIlluminatedShader->use(false);
+
    positionsAttribLoc = mNormalAndDepthShader->getAttributeLocation("position");
    normalsAttribLoc   = mNormalAndDepthShader->getAttributeLocation("normal");
    texCoordsAttribLoc = mNormalAndDepthShader->getAttributeLocation("texCoord");
@@ -272,6 +306,16 @@ void PlayState::loadModels()
       mNormalInvertedCubeMeshes[i].ConfigureVAO(positionsAttribLoc,
                                                 normalsAttribLoc,
                                                 texCoordsAttribLoc);
+   }
+
+   for (unsigned int i = 0,
+        size = static_cast<unsigned int>(mNormalInvertedIcosphereMeshes.size());
+        i < size;
+        ++i)
+   {
+      mNormalInvertedIcosphereMeshes[i].ConfigureVAO(positionsAttribLoc,
+                                                     normalsAttribLoc,
+                                                     texCoordsAttribLoc);
    }
 }
 
