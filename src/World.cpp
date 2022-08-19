@@ -12,6 +12,7 @@ World::World(const std::shared_ptr<DecalRenderer>& decalRenderer)
    , mCollidingVertexIndex(-1)
    , mCollisionNormal()
    , mDecalRenderer(decalRenderer)
+   , mCurrentScene(0)
 {
    initializeRigidBodies();
    initializeWorldTriangles();
@@ -35,11 +36,16 @@ void World::initializeRigidBodies()
 
 void World::initializeWorldTriangles()
 {
-   cgltf_data* data = LoadGLTFFile("resources/models/inverted_cube/inverted_cube.glb");
-   std::vector<SimpleMesh> worldMeshes = LoadSimpleMeshes(data);
+   cgltf_data* data = LoadGLTFFile("resources/models/inverted_icosphere/inverted_icosphere.glb");
+   std::vector<SimpleMesh> invertedIcosphereMeshes = LoadSimpleMeshes(data);
    FreeGLTFFile(data);
 
-   mWorldTriangles = getTrianglesFromMeshes(worldMeshes);
+   data = LoadGLTFFile("resources/models/inverted_cube/inverted_cube.glb");
+   std::vector<SimpleMesh> invertedCubeMeshes = LoadSimpleMeshes(data);
+   FreeGLTFFile(data);
+
+   mWorldTriangles.push_back(getTrianglesFromMeshes(invertedIcosphereMeshes));
+   mWorldTriangles.push_back(getTrianglesFromMeshes(invertedCubeMeshes));
 }
 
 bool World::simulate(float deltaTime)
@@ -104,6 +110,13 @@ bool World::simulate(float deltaTime)
    }
 
    return true; // No error
+}
+
+void World::changeScene(int sceneIndex)
+{
+   mRigidBodies.clear();
+   initializeRigidBodies();
+   mCurrentScene = sceneIndex;
 }
 
 void World::computeForces()
@@ -255,6 +268,7 @@ World::CollisionState World::checkForCollisions()
    mCollisionState = CollisionState::clear;
    const float depthEpsilon = 0.001f;
 
+   std::vector<Triangle>& sceneTriangles = mWorldTriangles[mCurrentScene];
    for (int rigidBodyIndex = 0; (rigidBodyIndex < mRigidBodies.size()) && (mCollisionState != CollisionState::penetrating); rigidBodyIndex++)
    {
       RigidBody& rigidBody = mRigidBodies[rigidBodyIndex];
@@ -266,9 +280,9 @@ World::CollisionState World::checkForCollisions()
          glm::vec3 cmToVertex = vertexPos - dynamicAndKinematicState.positionOfCM;
          glm::vec3 velocity   = dynamicAndKinematicState.velocityOfCM + glm::cross(dynamicAndKinematicState.angularVelocity, cmToVertex);
 
-         for (int triangleIndex = 0; (triangleIndex < mWorldTriangles.size()) && (mCollisionState != CollisionState::penetrating); triangleIndex++)
+         for (int triangleIndex = 0; (triangleIndex < sceneTriangles.size()) && (mCollisionState != CollisionState::penetrating); triangleIndex++)
          {
-            Triangle& triangle = mWorldTriangles[triangleIndex];
+            Triangle& triangle = sceneTriangles[triangleIndex];
 
             // For a point in space P0, a triangle with normal N and a point on the triangle P1,
             // the distance between P0 and the triangle is given by the projection of (P0 - P1) onto N

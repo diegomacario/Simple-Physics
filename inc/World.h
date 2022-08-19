@@ -22,6 +22,8 @@ public:
 
    const std::vector<RigidBody>& getRigidBodies() const { return mRigidBodies; };
 
+   void changeScene(int sceneIndex);
+
 private:
 
    enum class CollisionState : unsigned int
@@ -44,18 +46,19 @@ private:
 
    std::vector<Triangle>         getTrianglesFromMeshes(std::vector<SimpleMesh>& meshes);
 
-   std::vector<RigidBody>         mRigidBodies;
-   std::vector<Triangle>          mWorldTriangles;
+   std::vector<RigidBody>             mRigidBodies;
+   std::vector<std::vector<Triangle>> mWorldTriangles;
+   int                                mCurrentScene;
 
-   CollisionState                 mCollisionState;
-   int                            mCollidingRigidBodyIndex;
-   int                            mCollidingVertexIndex;
-   glm::vec3                      mCollisionNormal;
+   CollisionState                     mCollisionState;
+   int                                mCollidingRigidBodyIndex;
+   int                                mCollidingVertexIndex;
+   glm::vec3                          mCollisionNormal;
 
-   glm::vec3                      mDecalNormal;
-   bool                           mFirstCheckForCollisions;
+   glm::vec3                          mDecalNormal;
+   bool                               mFirstCheckForCollisions;
 
-   std::shared_ptr<DecalRenderer> mDecalRenderer;
+   std::shared_ptr<DecalRenderer>     mDecalRenderer;
 };
 
 #endif

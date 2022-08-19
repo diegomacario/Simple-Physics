@@ -30,6 +30,7 @@ public:
    void         resizeTextures(unsigned int widthOfFramebuffer, unsigned int heightOfFramebuffer);
    void         addDecal(const glm::vec3& decalPosition, const glm::vec3& decalNormal);
    void         updateDecals(float playbackSpeed);
+   void         reset();
 
 private:
 

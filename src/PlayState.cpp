@@ -46,7 +46,6 @@ void PlayState::enter()
 {
    initializeState();
    resetCamera();
-   resetScene();
 }
 
 void PlayState::processInput()
@@ -105,10 +104,17 @@ void PlayState::processInput()
 
 void PlayState::update(float deltaTime)
 {
-   // TODO: Handle simulation errors
-   mWorld.simulate(deltaTime * mSelectedPlaybackSpeed);
+   if (mSelectedScene != mCurrentScene)
+   {
+      mWorld.changeScene(mSelectedScene);
+      mDecalRenderer->reset();
+      mCurrentScene = mSelectedScene;
+   }
 
-   mDecalRenderer->updateDecals(mSelectedPlaybackSpeed);
+   // TODO: Handle simulation errors
+   mWorld.simulate(deltaTime * mPlaybackSpeed);
+
+   mDecalRenderer->updateDecals(mPlaybackSpeed);
 }
 
 void PlayState::render()
@@ -337,7 +343,10 @@ void PlayState::userInterface()
 
    if (ImGui::CollapsingHeader("Settings", nullptr, ImGuiTreeNodeFlags_DefaultOpen))
    {
-      ImGui::SliderFloat("Playback Speed", &mSelectedPlaybackSpeed, 0.0f, 1.0f, "%.3f");
+      ImGui::RadioButton("Icosphere", &mSelectedScene, 0);
+      ImGui::RadioButton("Cube", &mSelectedScene, 1);
+
+      ImGui::SliderFloat("Playback Speed", &mPlaybackSpeed, 0.0f, 1.0f, "%.3f");
 
       ImGui::RadioButton("Display final scene", &mDisplayMode, 0);
       ImGui::RadioButton("Display depth texture", &mDisplayMode, 1);
@@ -348,11 +357,6 @@ void PlayState::userInterface()
    }
 
    ImGui::End();
-}
-
-void PlayState::resetScene()
-{
-
 }
 
 void PlayState::resetCamera()
@@ -390,23 +394,46 @@ void PlayState::renderRigidBodies()
 
 void PlayState::renderWorld()
 {
-   mDiffuseShader->use(true);
-   mDiffuseShader->setUniformMat4("model",      glm::mat4(1.0f));
-   mDiffuseShader->setUniformMat4("view",       mCamera3.getViewMatrix());
-   mDiffuseShader->setUniformMat4("projection", mCamera3.getPerspectiveProjectionMatrix());
-   mInvertedCubeTexture->bind(0, mDiffuseShader->getUniformLocation("diffuseTex"));
-
-   // Loop over the inverted cube meshes and render each one
-   for (unsigned int i = 0,
-        size = static_cast<unsigned int>(mInvertedCubeMeshes.size());
-        i < size;
-        ++i)
+   if (mCurrentScene == 0)
    {
-      mInvertedCubeMeshes[i].Render();
-   }
+      mDiffuseShader->use(true);
+      mDiffuseShader->setUniformMat4("model",      glm::mat4(1.0f));
+      mDiffuseShader->setUniformMat4("view",       mCamera3.getViewMatrix());
+      mDiffuseShader->setUniformMat4("projection", mCamera3.getPerspectiveProjectionMatrix());
+      mInvertedCubeTexture->bind(0, mDiffuseShader->getUniformLocation("diffuseTex"));
 
-   mInvertedCubeTexture->unbind(0);
-   mDiffuseShader->use(false);
+      // Loop over the inverted icosphere meshes and render each one
+      for (unsigned int i = 0,
+           size = static_cast<unsigned int>(mInvertedIcosphereMeshes.size());
+           i < size;
+           ++i)
+      {
+         mInvertedIcosphereMeshes[i].Render();
+      }
+
+      mInvertedCubeTexture->unbind(0);
+      mDiffuseShader->use(false);
+   }
+   else if (mCurrentScene == 1)
+   {
+      mDiffuseShader->use(true);
+      mDiffuseShader->setUniformMat4("model",      glm::mat4(1.0f));
+      mDiffuseShader->setUniformMat4("view",       mCamera3.getViewMatrix());
+      mDiffuseShader->setUniformMat4("projection", mCamera3.getPerspectiveProjectionMatrix());
+      mInvertedCubeTexture->bind(0, mDiffuseShader->getUniformLocation("diffuseTex"));
+
+      // Loop over the inverted cube meshes and render each one
+      for (unsigned int i = 0,
+           size = static_cast<unsigned int>(mInvertedCubeMeshes.size());
+           i < size;
+           ++i)
+      {
+         mInvertedCubeMeshes[i].Render();
+      }
+
+      mInvertedCubeTexture->unbind(0);
+      mDiffuseShader->use(false);
+   }
 }
 
 void PlayState::renderNormalsAndDepth()
@@ -417,13 +444,26 @@ void PlayState::renderNormalsAndDepth()
    mNormalAndDepthShader->setUniformMat4("projection", mCamera3.getPerspectiveProjectionMatrix());
    mNormalAndDepthShader->setUniformMat3("normalMat",  glm::mat3(1.0f));
 
-   // Loop over the normal inverted cube meshes and render each one
-   for (unsigned int i = 0,
-        size = static_cast<unsigned int>(mNormalInvertedCubeMeshes.size());
-        i < size;
-        ++i)
+   // Loop over the normal inverted meshes and render each one
+   if (mCurrentScene == 0)
    {
-      mNormalInvertedCubeMeshes[i].Render();
+      for (unsigned int i = 0,
+           size = static_cast<unsigned int>(mNormalInvertedIcosphereMeshes.size());
+           i < size;
+           ++i)
+      {
+         mNormalInvertedIcosphereMeshes[i].Render();
+      }
+   }
+   else if (mCurrentScene == 1)
+   {
+      for (unsigned int i = 0,
+           size = static_cast<unsigned int>(mNormalInvertedCubeMeshes.size());
+           i < size;
+           ++i)
+      {
+         mNormalInvertedCubeMeshes[i].Render();
+      }
    }
 
    if (mDisplayMode == 1 || mDisplayMode == 2) // Normal or depth

@@ -212,6 +212,15 @@ void DecalRenderer::updateDecals(float playbackSpeed)
    updateShrinkingDecals(playbackSpeed);
 }
 
+void DecalRenderer::reset()
+{
+   mGrowingDecals.clear();
+   mStableDecals.clear();
+   mShrinkingDecals.clear();
+   mDecals.clear();
+   mDecalIndex = 0;
+}
+
 void DecalRenderer::configureDecalFBO()
 {
    glGenFramebuffers(1, &mDecalFBO);

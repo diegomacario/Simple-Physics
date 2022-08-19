@@ -39,8 +39,6 @@ private:
 
    void userInterface();
 
-   void resetScene();
-
    void resetCamera();
 
    void renderRigidBodies();
@@ -73,7 +71,9 @@ private:
 
    World                                  mWorld;
 
-   float                                  mSelectedPlaybackSpeed = 1.0f;
+   int                                    mCurrentScene = 0;
+   int                                    mSelectedScene = 0;
+   float                                  mPlaybackSpeed = 1.0f;
    int                                    mDisplayMode = 0;
    bool                                   mDisplayDecalOBBs = false;
    bool                                   mDisplayDiscardedDecalParts = false;
