@@ -24,9 +24,9 @@ PlayState::PlayState(const std::shared_ptr<FiniteStateMachine>& finiteStateMachi
    mDiffuseShader = ResourceManager<Shader>().loadUnmanagedResource<ShaderLoader>("resources/shaders/diffuse.vert",
                                                                                   "resources/shaders/diffuse.frag");
 
-   // Initialize the illuminated shader
-   mIlluminatedShader = ResourceManager<Shader>().loadUnmanagedResource<ShaderLoader>("resources/shaders/illuminated.vert",
-                                                                                      "resources/shaders/illuminated.frag");
+   // Initialize the Gourad shader
+   mGouradShader = ResourceManager<Shader>().loadUnmanagedResource<ShaderLoader>("resources/shaders/gourad.vert",
+                                                                                 "resources/shaders/gourad.frag");
 
    // Initialize the normal and depth shader
    mNormalAndDepthShader = ResourceManager<Shader>().loadUnmanagedResource<ShaderLoader>("resources/shaders/normal_and_depth.vert",
@@ -260,9 +260,9 @@ void PlayState::loadModels()
                                           texCoordsAttribLoc);
    }
 
-   positionsAttribLoc = mIlluminatedShader->getAttributeLocation("position");
-   normalsAttribLoc   = mIlluminatedShader->getAttributeLocation("normal");
-   texCoordsAttribLoc = mIlluminatedShader->getAttributeLocation("texCoord");
+   positionsAttribLoc = mGouradShader->getAttributeLocation("position");
+   normalsAttribLoc   = mGouradShader->getAttributeLocation("normal");
+   texCoordsAttribLoc = mGouradShader->getAttributeLocation("texCoord");
 
    for (unsigned int i = 0,
         size = static_cast<unsigned int>(mInvertedIcosphereMeshes.size());
@@ -274,11 +274,11 @@ void PlayState::loadModels()
                                                texCoordsAttribLoc);
    }
 
-   mIlluminatedShader->use(true);
-   mIlluminatedShader->setUniformVec3( "light.worldPos",  glm::vec3(0.0f));
-   mIlluminatedShader->setUniformVec3( "light.color",     glm::vec3(1.0f));
-   mIlluminatedShader->setUniformFloat("light.linearAtt", 0.0f);
-   mIlluminatedShader->use(false);
+   mGouradShader->use(true);
+   mGouradShader->setUniformVec3( "light.worldPos",  glm::vec3(0.0, 0.0f, -1.0f));
+   mGouradShader->setUniformVec3( "light.color",     glm::vec3(1.0f));
+   mGouradShader->setUniformFloat("light.linearAtt", 0.0f);
+   mGouradShader->use(false);
 
    positionsAttribLoc = mNormalAndDepthShader->getAttributeLocation("position");
    normalsAttribLoc   = mNormalAndDepthShader->getAttributeLocation("normal");
@@ -394,13 +394,13 @@ void PlayState::renderRigidBodies()
 
 void PlayState::renderWorld()
 {
-   if (mCurrentScene == 0)
+   if (mCurrentScene == 0) // Icosphere
    {
-      mDiffuseShader->use(true);
-      mDiffuseShader->setUniformMat4("model",      glm::mat4(1.0f));
-      mDiffuseShader->setUniformMat4("view",       mCamera3.getViewMatrix());
-      mDiffuseShader->setUniformMat4("projection", mCamera3.getPerspectiveProjectionMatrix());
-      mInvertedCubeTexture->bind(0, mDiffuseShader->getUniformLocation("diffuseTex"));
+      mGouradShader->use(true);
+      mGouradShader->setUniformMat4("model",        glm::mat4(1.0f));
+      mGouradShader->setUniformMat4("view",         mCamera3.getViewMatrix());
+      mGouradShader->setUniformMat4("projection",   mCamera3.getPerspectiveProjectionMatrix());
+      mGouradShader->setUniformVec3("diffuseColor", glm::vec3(1.0f));
 
       // Loop over the inverted icosphere meshes and render each one
       for (unsigned int i = 0,
@@ -411,10 +411,9 @@ void PlayState::renderWorld()
          mInvertedIcosphereMeshes[i].Render();
       }
 
-      mInvertedCubeTexture->unbind(0);
-      mDiffuseShader->use(false);
+      mGouradShader->use(false);
    }
-   else if (mCurrentScene == 1)
+   else if (mCurrentScene == 1) // Cube
    {
       mDiffuseShader->use(true);
       mDiffuseShader->setUniformMat4("model",      glm::mat4(1.0f));

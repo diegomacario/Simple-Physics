@@ -52,7 +52,7 @@ private:
    Camera3                                mCamera3;
 
    std::shared_ptr<Shader>                mDiffuseShader;
-   std::shared_ptr<Shader>                mIlluminatedShader;
+   std::shared_ptr<Shader>                mGouradShader;
    std::shared_ptr<Shader>                mNormalAndDepthShader;
 
    std::vector<AnimatedMesh>              mCubeMeshes;
