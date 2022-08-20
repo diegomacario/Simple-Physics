@@ -57,6 +57,7 @@ bool World::simulate(float deltaTime)
    {
       if ((targetTime - currentTime) < 1e-6) // TODO: Make threshold a constant
       {
+         changeScene(mCurrentScene);
          return false; // Unresolvable penetration error
       }
 
@@ -89,6 +90,12 @@ bool World::simulate(float deltaTime)
             resolveCollisions();
             numIterations++;
          } while ((checkForCollisions() == CollisionState::colliding) && (numIterations < 100));
+
+         if ((numIterations == 100) && (checkForCollisions() == CollisionState::colliding))
+         {
+            changeScene(mCurrentScene);
+            return false; // Unresolvable collision error
+         }
       }
 
       if (mCollidingRigidBodyIndex != -1 && mCollidingVertexIndex != -1)
