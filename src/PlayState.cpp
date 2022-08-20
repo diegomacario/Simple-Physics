@@ -373,11 +373,11 @@ void PlayState::userInterface()
    {
       ImGui::Combo("Scene", &mSelectedScene, mSceneNames.c_str());
 
-      ImGui::SliderFloat("Playback speed", &mPlaybackSpeed, 0.0f, 1.0f, "%.3f");
-
       ImGui::RadioButton("Display final scene", &mDisplayMode, 0);
       ImGui::RadioButton("Display depth texture", &mDisplayMode, 1);
       ImGui::RadioButton("Display normal texture", &mDisplayMode, 2);
+
+      ImGui::SliderFloat("Playback speed", &mPlaybackSpeed, 0.0f, 1.0f, "%.3f");
 
       if (ImGui::InputInt("Max num decals", &mMaxNumDecals, 1, 1, ImGuiInputTextFlags_EnterReturnsTrue))
       {
@@ -393,14 +393,19 @@ void PlayState::userInterface()
 
       ImGui::SliderFloat("Decal scale", &mSelectedDecalScale, 0.1f, 3.0f, "%.3f");
 
-      ImGui::SliderFloat("Delay between circles", &mSelectedDelayBetweenCircles, 0.0f, 1.0f, "%.3f");
+      ImGui::SliderFloat("Animation delay", &mSelectedDelayBetweenCircles, 0.0f, 1.0f, "%.3f");
 
-      ImGui::SliderFloat("Decal bounce", &mSelectedDecalBounce, 0.0f, 10.0f, "%.3f");
+      ImGui::SliderFloat("Animation bounce", &mSelectedDecalBounce, 0.0f, 10.0f, "%.3f");
 
+#ifndef __EMSCRIPTEN__
       ImGui::SliderFloat("Decal normal threshold", &mDecalNormalThreshold, 0.0f, 180.0f, "%.3f");
+#endif
 
       ImGui::Checkbox("Display decal OBBs", &mDisplayDecalOBBs);
+
+#ifndef __EMSCRIPTEN__
       ImGui::Checkbox("Display discarded decal parts", &mDisplayDiscardedDecalParts);
+#endif
    }
 
    ImGui::End();
