@@ -14,6 +14,7 @@ include_directories("${CMAKE_SOURCE_DIR}/inc"
 set(project_headers
     inc/AnimatedMesh.h
     inc/Camera3.h
+    inc/Decal.h
     inc/DecalRenderer.h
     inc/FiniteStateMachine.h
     inc/Frame.h
@@ -22,15 +23,18 @@ set(project_headers
     inc/Interpolation.h
     inc/PlayState.h
     inc/Quat.h
+    inc/Ray.h
     inc/ResourceManager.h
     inc/RigidBody.h
     inc/Shader.h
     inc/ShaderLoader.h
+    inc/SimpleMesh.h
     inc/State.h
     inc/Texture.h
     inc/TextureLoader.h
     inc/Track.h
     inc/Transform.h
+    inc/Triangle.h
     inc/Wall.h
     inc/Window.h
     inc/World.h)
@@ -38,6 +42,7 @@ set(project_headers
 set(project_sources
     src/AnimatedMesh.cpp
     src/Camera3.cpp
+    src/Decal.cpp
     src/DecalRenderer.cpp
     src/FiniteStateMachine.cpp
     src/Game.cpp
@@ -45,13 +50,16 @@ set(project_sources
     src/main.cpp
     src/PlayState.cpp
     src/Quat.cpp
+    src/Ray.cpp
     src/RigidBody.cpp
     src/Shader.cpp
     src/ShaderLoader.cpp
+    src/SimpleMesh.cpp
     src/Texture.cpp
     src/TextureLoader.cpp
     src/Track.cpp
     src/Transform.cpp
+    src/Triangle.cpp
     src/Wall.cpp
     src/Window.cpp
     src/World.cpp
