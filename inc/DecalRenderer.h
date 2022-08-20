@@ -32,6 +32,12 @@ public:
    void         updateDecals(float playbackSpeed);
    void         reset();
 
+   void         setMaxNumDecals(int maxNumDecals) { mMaxNumDecals = maxNumDecals; }
+   void         setDecalScale(float scale);
+   void         setNormalThreshold(float normalThreshold) { mNormalThreshold = glm::cos(glm::radians(normalThreshold)); }
+   void         setDelayBetweenCircles(float delay) { mDelayBetweenCircles = delay; }
+   void         setDecalBounce(float bounce);
+
 private:
 
    void         configureDecalFBO();
@@ -81,6 +87,9 @@ private:
    ScalarTrack                              mShrinkAnimation;
 
    unsigned int                             mDecalIndex;
+
+   int                                      mMaxNumDecals;
+   float                                    mDelayBetweenCircles;
 };
 
 #endif

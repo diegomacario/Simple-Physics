@@ -71,10 +71,19 @@ private:
 
    World                                  mWorld;
 
+   std::string                            mSceneNames;
    int                                    mCurrentScene = 0;
    int                                    mSelectedScene = 0;
    float                                  mPlaybackSpeed = 1.0f;
    int                                    mDisplayMode = 0;
+   int                                    mMaxNumDecals = 100;
+   float                                  mCurrentDecalScale = 1.0f;
+   float                                  mSelectedDecalScale = 1.0f;
+   float                                  mDecalNormalThreshold = 89.0f;
+   float                                  mCurrentDelayBetweenCircles = 0.1f;
+   float                                  mSelectedDelayBetweenCircles = 0.1f;
+   float                                  mCurrentDecalBounce = 4.5f;
+   float                                  mSelectedDecalBounce = 4.5f;
    bool                                   mDisplayDecalOBBs = false;
    bool                                   mDisplayDiscardedDecalParts = false;
 };

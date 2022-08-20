@@ -1,15 +1,16 @@
 #include "Decal.h"
 
-Decal::Decal(const Transform& modelTransform, const glm::vec3& normal, unsigned int decalIndex)
+Decal::Decal(const Transform& modelTransform, const glm::vec3& normal, unsigned int decalIndex, float delayBetweenCircles)
    : mModelTransform()
    , mModelMatrix()
    , mInverseModelMatrix()
    , mNormal(normal)
-   , mPlaybackTime(0.0f)
+   , mDecalDepthScalingFactor(2.0f)
+   , mDelayBetweenCircles(delayBetweenCircles)
    , mCircleModelTransforms({modelTransform, modelTransform, modelTransform, modelTransform})
    , mCircleModelMatrices()
    , mCircleInverseModelMatrices()
-   , mCirclePlaybackTimes({0.0f, -0.1f, -0.2f, -0.3f})
+   , mCirclePlaybackTimes({0.0f, -delayBetweenCircles, -delayBetweenCircles * 2.0f, -delayBetweenCircles * 3.0f})
    , mDecalIndex(decalIndex)
 {
 
@@ -29,7 +30,7 @@ bool Decal::grow(const ScalarTrack& growAnimation, float playbackSpeed)
       for (int i = 0; i < 4; ++i)
       {
          float scalingFactor             = growAnimation.Sample(mCirclePlaybackTimes[i], false);
-         mCircleModelTransforms[i].scale = glm::vec3(scalingFactor, scalingFactor, 1.0f);
+         mCircleModelTransforms[i].scale = glm::vec3(scalingFactor, scalingFactor, mDecalDepthScalingFactor);
          mCircleModelMatrices[i]         = transformToMat4(mCircleModelTransforms[i]);
          mCircleInverseModelMatrices[i]  = glm::inverse(mCircleModelMatrices[i]);
       }
@@ -40,7 +41,7 @@ bool Decal::grow(const ScalarTrack& growAnimation, float playbackSpeed)
       mInverseModelMatrix = glm::inverse(mModelMatrix);
 
       // Set the values that will be used in the shrinking state
-      mCirclePlaybackTimes = {-0.3f, -0.2f, -0.1f, 0.0f};
+      mCirclePlaybackTimes = {-mDelayBetweenCircles * 3.0f, -mDelayBetweenCircles * 2.0f, -mDelayBetweenCircles, 0.0f};
 
       return true;
    }
@@ -48,7 +49,7 @@ bool Decal::grow(const ScalarTrack& growAnimation, float playbackSpeed)
    for (int i = 0; i < 4; ++i)
    {
       float scalingFactor             = growAnimation.Sample(mCirclePlaybackTimes[i], false);
-      mCircleModelTransforms[i].scale = glm::vec3(scalingFactor, scalingFactor, 1.0f);
+      mCircleModelTransforms[i].scale = glm::vec3(scalingFactor, scalingFactor, mDecalDepthScalingFactor);
       mCircleModelMatrices[i]         = transformToMat4(mCircleModelTransforms[i]);
       mCircleInverseModelMatrices[i]  = glm::inverse(mCircleModelMatrices[i]);
    }
@@ -70,7 +71,7 @@ bool Decal::shrink(const ScalarTrack& shrinkAnimation, float playbackSpeed)
       for (int i = 0; i < 4; ++i)
       {
          float scalingFactor             = shrinkAnimation.Sample(mCirclePlaybackTimes[i], false);
-         mCircleModelTransforms[i].scale = glm::vec3(scalingFactor, scalingFactor, 1.0f);
+         mCircleModelTransforms[i].scale = glm::vec3(scalingFactor, scalingFactor, mDecalDepthScalingFactor);
          mCircleModelMatrices[i]         = transformToMat4(mCircleModelTransforms[i]);
          mCircleInverseModelMatrices[i]  = glm::inverse(mCircleModelMatrices[i]);
       }
@@ -81,10 +82,17 @@ bool Decal::shrink(const ScalarTrack& shrinkAnimation, float playbackSpeed)
    for (int i = 0; i < 4; ++i)
    {
       float scalingFactor             = shrinkAnimation.Sample(mCirclePlaybackTimes[i], false);
-      mCircleModelTransforms[i].scale = glm::vec3(scalingFactor, scalingFactor, 1.0f);
+      mCircleModelTransforms[i].scale = glm::vec3(scalingFactor, scalingFactor, mDecalDepthScalingFactor);
       mCircleModelMatrices[i]         = transformToMat4(mCircleModelTransforms[i]);
       mCircleInverseModelMatrices[i]  = glm::inverse(mCircleModelMatrices[i]);
    }
 
    return false;
+}
+
+void Decal::updateScale(float scale)
+{
+   mModelTransform.scale = glm::vec3(scale, scale, mDecalDepthScalingFactor);
+   mModelMatrix          = transformToMat4(mModelTransform);
+   mInverseModelMatrix   = glm::inverse(mModelMatrix);
 }

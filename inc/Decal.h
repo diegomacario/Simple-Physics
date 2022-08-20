@@ -10,7 +10,7 @@ class Decal
 {
 public:
 
-   Decal(const Transform& modelTransform, const glm::vec3& normal, unsigned int decalIndex);
+   Decal(const Transform& modelTransform, const glm::vec3& normal, unsigned int decalIndex, float delayBetweenCircles);
    ~Decal() = default;
 
    bool                            grow(const ScalarTrack& growAnimation, float playbackSpeed);
@@ -25,13 +25,16 @@ public:
 
    unsigned int                    getDecalIndex() const { return mDecalIndex; }
 
+   void                            updateScale(float scale);
+
 private:
 
    Transform                mModelTransform;
    glm::mat4                mModelMatrix;
    glm::mat4                mInverseModelMatrix;
    glm::vec3                mNormal;
-   float                    mPlaybackTime;
+   float                    mDecalDepthScalingFactor;
+   float                    mDelayBetweenCircles;
 
    std::array<Transform, 4> mCircleModelTransforms;
    std::array<glm::mat4, 4> mCircleModelMatrices;

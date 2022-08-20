@@ -21,6 +21,8 @@ DecalRenderer::DecalRenderer(unsigned int widthOfFramebuffer, unsigned int heigh
    , mDepthTexture(0)
    , mNormalThreshold(glm::cos(glm::radians(89.0f)))
    , mDecalIndex(0)
+   , mMaxNumDecals(100)
+   , mDelayBetweenCircles(0.1f)
 {
    configureDecalFBO();
 
@@ -200,7 +202,7 @@ void DecalRenderer::resizeTextures(unsigned int widthOfFramebuffer, unsigned int
 void DecalRenderer::addDecal(const glm::vec3& decalPosition, const glm::vec3& decalNormal)
 {
    Transform modelTransform(decalPosition, Q::lookRotation(decalNormal, glm::vec3(0.0f, 1.0f, 0.0f)), glm::vec3(1.0f, 1.0f, 1.0f));
-   mDecals.emplace_back(modelTransform, decalNormal, mDecalIndex);
+   mDecals.emplace_back(modelTransform, decalNormal, mDecalIndex, mDelayBetweenCircles);
    mGrowingDecals.push_back(std::prev(mDecals.end()));
    mDecalIndex = (mDecalIndex + 1) % 20;
 }
@@ -219,6 +221,26 @@ void DecalRenderer::reset()
    mShrinkingDecals.clear();
    mDecals.clear();
    mDecalIndex = 0;
+}
+
+void DecalRenderer::setDecalScale(float scale)
+{
+   ScalarFrame& frame1 = mGrowAnimation.GetFrame(1);
+   frame1.mValue[0]    = scale;
+
+   ScalarFrame& frame0 = mShrinkAnimation.GetFrame(0);
+   frame0.mValue[0]    = scale;
+
+   for (const std::list<Decal>::iterator& decalIter : mStableDecals)
+   {
+      decalIter->updateScale(scale);
+   }
+}
+
+void DecalRenderer::setDecalBounce(float bounce)
+{
+   ScalarFrame& frame0 = mGrowAnimation.GetFrame(0);
+   frame0.mOutSlope[0] = bounce;
 }
 
 void DecalRenderer::configureDecalFBO()
@@ -369,7 +391,10 @@ void DecalRenderer::updateGrowingDecals(float playbackSpeed)
 
 void DecalRenderer::updateStableDecals()
 {
-   int numDecalsToStartShrinking = static_cast<int>(mStableDecals.size()) - 100;
+   int numDecalsToStartShrinking = static_cast<int>(mStableDecals.size()) - mMaxNumDecals;
+
+   /*
+   // Start erasing all dead decals at once
    if (numDecalsToStartShrinking > 0)
    {
       for (int i = 0; i < numDecalsToStartShrinking; ++i)
@@ -378,6 +403,14 @@ void DecalRenderer::updateStableDecals()
       }
 
       mStableDecals.erase(mStableDecals.begin(), std::next(mStableDecals.begin(), numDecalsToStartShrinking));
+   }
+   */
+
+   // Start erasing one dead decal per frame
+   if (numDecalsToStartShrinking > 0)
+   {
+      mShrinkingDecals.push_back(mStableDecals[0]);
+      mStableDecals.erase(mStableDecals.begin(), std::next(mStableDecals.begin(), 1));
    }
 }
 

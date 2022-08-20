@@ -35,6 +35,12 @@ PlayState::PlayState(const std::shared_ptr<FiniteStateMachine>& finiteStateMachi
    loadModels();
 
    mWindow->setDecalRenderer(mDecalRenderer);
+
+   std::vector<std::string> sceneNames { "Icosphere", "Cube" };
+   for (const std::string& sceneName : sceneNames)
+   {
+      mSceneNames += sceneName + '\0';
+   }
 }
 
 void PlayState::initializeState()
@@ -110,6 +116,28 @@ void PlayState::update(float deltaTime)
       mDecalRenderer->reset();
       mCurrentScene = mSelectedScene;
    }
+
+   mDecalRenderer->setMaxNumDecals(mMaxNumDecals);
+
+   if (mSelectedDecalScale != mCurrentDecalScale)
+   {
+      mDecalRenderer->setDecalScale(mSelectedDecalScale);
+      mCurrentDecalScale = mSelectedDecalScale;
+   }
+
+   if (mSelectedDelayBetweenCircles != mCurrentDelayBetweenCircles)
+   {
+      mDecalRenderer->setDelayBetweenCircles(mSelectedDelayBetweenCircles);
+      mCurrentDelayBetweenCircles = mSelectedDelayBetweenCircles;
+   }
+
+   if (mSelectedDecalBounce != mCurrentDecalBounce)
+   {
+      mDecalRenderer->setDecalBounce(mSelectedDecalBounce);
+      mCurrentDecalBounce = mSelectedDecalBounce;
+   }
+
+   mDecalRenderer->setNormalThreshold(mDecalNormalThreshold);
 
    // TODO: Handle simulation errors
    mWorld.simulate(deltaTime * mPlaybackSpeed);
@@ -275,7 +303,7 @@ void PlayState::loadModels()
    }
 
    mGouradShader->use(true);
-   mGouradShader->setUniformVec3( "light.worldPos",  glm::vec3(0.0, 0.0f, -1.0f));
+   mGouradShader->setUniformVec3( "light.worldPos",  glm::vec3(0.0, 0.0f, 1.0f));
    mGouradShader->setUniformVec3( "light.color",     glm::vec3(1.0f));
    mGouradShader->setUniformFloat("light.linearAtt", 0.0f);
    mGouradShader->use(false);
@@ -343,14 +371,33 @@ void PlayState::userInterface()
 
    if (ImGui::CollapsingHeader("Settings", nullptr, ImGuiTreeNodeFlags_DefaultOpen))
    {
-      ImGui::RadioButton("Icosphere", &mSelectedScene, 0);
-      ImGui::RadioButton("Cube", &mSelectedScene, 1);
+      ImGui::Combo("Scene", &mSelectedScene, mSceneNames.c_str());
 
-      ImGui::SliderFloat("Playback Speed", &mPlaybackSpeed, 0.0f, 1.0f, "%.3f");
+      ImGui::SliderFloat("Playback speed", &mPlaybackSpeed, 0.0f, 1.0f, "%.3f");
 
       ImGui::RadioButton("Display final scene", &mDisplayMode, 0);
       ImGui::RadioButton("Display depth texture", &mDisplayMode, 1);
       ImGui::RadioButton("Display normal texture", &mDisplayMode, 2);
+
+      if (ImGui::InputInt("Max num decals", &mMaxNumDecals, 1, 1, ImGuiInputTextFlags_EnterReturnsTrue))
+      {
+         if (mMaxNumDecals < 1)
+         {
+            mMaxNumDecals = 1;
+         }
+         else if (mMaxNumDecals > 1000)
+         {
+            mMaxNumDecals = 1000;
+         }
+      }
+
+      ImGui::SliderFloat("Decal scale", &mSelectedDecalScale, 0.1f, 3.0f, "%.3f");
+
+      ImGui::SliderFloat("Delay between circles", &mSelectedDelayBetweenCircles, 0.0f, 1.0f, "%.3f");
+
+      ImGui::SliderFloat("Decal bounce", &mSelectedDecalBounce, 0.0f, 10.0f, "%.3f");
+
+      ImGui::SliderFloat("Decal normal threshold", &mDecalNormalThreshold, 0.0f, 180.0f, "%.3f");
 
       ImGui::Checkbox("Display decal OBBs", &mDisplayDecalOBBs);
       ImGui::Checkbox("Display discarded decal parts", &mDisplayDiscardedDecalParts);
