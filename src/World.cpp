@@ -48,7 +48,7 @@ void World::initializeWorldTriangles()
    mWorldTriangles.push_back(getTrianglesFromMeshes(invertedCubeMeshes));
 }
 
-bool World::simulate(float deltaTime)
+bool World::simulate(float deltaTime, bool gravity, int velocityChange)
 {
    float currentTime = 0.0f;
    float targetTime  = deltaTime;
@@ -61,9 +61,27 @@ bool World::simulate(float deltaTime)
          return false; // Unresolvable penetration error
       }
 
-      computeForces();
+      computeForces(gravity);
 
       integrateUsingRK4(targetTime - currentTime);
+
+      switch (velocityChange)
+      {
+         case 0: // No change
+            break;
+         case 1: // Increase
+            for (std::vector<RigidBody>::iterator iter = mRigidBodies.begin(); iter != mRigidBodies.end(); ++iter)
+            {
+               iter->getState(future).velocityOfCM *= 2.0f;
+            }
+            break;
+         case 2: // Decrease
+            for (std::vector<RigidBody>::iterator iter = mRigidBodies.begin(); iter != mRigidBodies.end(); ++iter)
+            {
+               iter->getState(future).velocityOfCM *= 0.5f;
+            }
+            break;
+      }
 
       // Calculate the world-space vertices of each rigid body at the target time
       for (std::vector<RigidBody>::iterator iter = mRigidBodies.begin(); iter != mRigidBodies.end(); ++iter)
@@ -126,7 +144,7 @@ void World::changeScene(int sceneIndex)
    mCurrentScene = sceneIndex;
 }
 
-void World::computeForces()
+void World::computeForces(bool gravity)
 {
    for (std::vector<RigidBody>::iterator iter = mRigidBodies.begin(); iter != mRigidBodies.end(); ++iter)
    {
@@ -136,7 +154,8 @@ void World::computeForces()
       currentState.torque = glm::vec3(0.0f);
 
       // Force = Mass * Acceleration
-      currentState.forceOfCM = glm::vec3(0.0f, 0.0f, 0.0f) / iter->getOneOverMass();
+      float acceleration = gravity ? -7.5f : 0.0f;
+      currentState.forceOfCM = glm::vec3(0.0f, acceleration, 0.0f) / iter->getOneOverMass();
    }
 }
 

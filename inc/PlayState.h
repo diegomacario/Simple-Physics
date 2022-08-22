@@ -86,6 +86,8 @@ private:
    float                                  mSelectedDecalBounce = 4.5f;
    bool                                   mDisplayDecalOBBs = false;
    bool                                   mDisplayDiscardedDecalParts = false;
+   bool                                   mGravity = false;
+   int                                    mVelocityChange = 0; // 0 = No change, 1 = Increase, 2 = Decrease
 };
 
 #endif

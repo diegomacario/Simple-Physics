@@ -18,7 +18,7 @@ public:
    void                          initializeRigidBodies();
    void                          initializeWorldTriangles();
 
-   bool                          simulate(float deltaTime);
+   bool                          simulate(float deltaTime, bool gravity, int velocityChange);
 
    const std::vector<RigidBody>& getRigidBodies() const { return mRigidBodies; };
 
@@ -33,7 +33,7 @@ private:
       clear       = 2,
    };
 
-   void                          computeForces();
+   void                          computeForces(bool gravity);
 
    void                          integrateUsingEulers(float deltaTime);
    void                          integrateUsingRK4(float deltaTime);

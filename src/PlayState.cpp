@@ -140,7 +140,8 @@ void PlayState::update(float deltaTime)
    mDecalRenderer->setNormalThreshold(mDecalNormalThreshold);
 
    // TODO: Handle simulation errors
-   mWorld.simulate(deltaTime * mPlaybackSpeed);
+   mWorld.simulate(deltaTime * mPlaybackSpeed, mGravity, mVelocityChange);
+   mVelocityChange = 0;
 
    mDecalRenderer->updateDecals(mPlaybackSpeed);
 }
@@ -406,6 +407,18 @@ void PlayState::userInterface()
 #ifndef __EMSCRIPTEN__
       ImGui::Checkbox("Display discarded decal parts", &mDisplayDiscardedDecalParts);
 #endif
+   }
+
+   ImGui::Checkbox("Gravity", &mGravity);
+
+   if (ImGui::Button("Double velocity"))
+   {
+      mVelocityChange = 1;
+   }
+
+   if (ImGui::Button("Halve velocity"))
+   {
+      mVelocityChange = 2;
    }
 
    ImGui::End();
