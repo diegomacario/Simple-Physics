@@ -12,7 +12,6 @@ World::World(const std::shared_ptr<DecalRenderer>& decalRenderer)
    , mCollidingVertexIndex(-1)
    , mCollisionNormal()
    , mDecalRenderer(decalRenderer)
-   , mCurrentScene(0)
 {
    initializeRigidBodies();
    initializeWorldTriangles();
@@ -36,16 +35,11 @@ void World::initializeRigidBodies()
 
 void World::initializeWorldTriangles()
 {
-   cgltf_data* data = LoadGLTFFile("resources/models/inverted_icosphere/inverted_icosphere.glb");
-   std::vector<SimpleMesh> invertedIcosphereMeshes = LoadSimpleMeshes(data);
-   FreeGLTFFile(data);
-
-   data = LoadGLTFFile("resources/models/inverted_cube/inverted_cube.glb");
+   cgltf_data* data = LoadGLTFFile("resources/models/inverted_cube/inverted_cube.glb");
    std::vector<SimpleMesh> invertedCubeMeshes = LoadSimpleMeshes(data);
    FreeGLTFFile(data);
 
-   mWorldTriangles.push_back(getTrianglesFromMeshes(invertedIcosphereMeshes));
-   mWorldTriangles.push_back(getTrianglesFromMeshes(invertedCubeMeshes));
+   mWorldTriangles = getTrianglesFromMeshes(invertedCubeMeshes);
 }
 
 bool World::simulate(float deltaTime, bool gravity, int velocityChange)
@@ -57,7 +51,7 @@ bool World::simulate(float deltaTime, bool gravity, int velocityChange)
    {
       if ((targetTime - currentTime) < 1e-6) // TODO: Make threshold a constant
       {
-         changeScene(mCurrentScene);
+         reset();
          return false; // Unresolvable penetration error
       }
 
@@ -111,7 +105,7 @@ bool World::simulate(float deltaTime, bool gravity, int velocityChange)
 
          if ((numIterations == 100) && (checkForCollisions() == CollisionState::colliding))
          {
-            changeScene(mCurrentScene);
+            reset();
             return false; // Unresolvable collision error
          }
       }
@@ -135,13 +129,6 @@ bool World::simulate(float deltaTime, bool gravity, int velocityChange)
    }
 
    return true; // No error
-}
-
-void World::changeScene(int sceneIndex)
-{
-   mRigidBodies.clear();
-   initializeRigidBodies();
-   mCurrentScene = sceneIndex;
 }
 
 void World::computeForces(bool gravity)
@@ -294,7 +281,7 @@ World::CollisionState World::checkForCollisions()
    mCollisionState = CollisionState::clear;
    const float depthEpsilon = 0.001f;
 
-   std::vector<Triangle>& sceneTriangles = mWorldTriangles[mCurrentScene];
+   std::vector<Triangle>& sceneTriangles = mWorldTriangles;
    for (int rigidBodyIndex = 0; (rigidBodyIndex < mRigidBodies.size()) && (mCollisionState != CollisionState::penetrating); rigidBodyIndex++)
    {
       RigidBody& rigidBody = mRigidBodies[rigidBodyIndex];
@@ -430,4 +417,10 @@ std::vector<Triangle> World::getTrianglesFromMeshes(std::vector<SimpleMesh>& mes
    }
 
    return triangles;
+}
+
+void World::reset()
+{
+   mRigidBodies.clear();
+   initializeRigidBodies();
 }

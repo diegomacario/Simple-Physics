@@ -35,12 +35,6 @@ PlayState::PlayState(const std::shared_ptr<FiniteStateMachine>& finiteStateMachi
    loadModels();
 
    mWindow->setDecalRenderer(mDecalRenderer);
-
-   std::vector<std::string> sceneNames { "Icosphere", "Cube" };
-   for (const std::string& sceneName : sceneNames)
-   {
-      mSceneNames += sceneName + '\0';
-   }
 }
 
 void PlayState::initializeState()
@@ -110,13 +104,6 @@ void PlayState::processInput()
 
 void PlayState::update(float deltaTime)
 {
-   if (mSelectedScene != mCurrentScene)
-   {
-      mWorld.changeScene(mSelectedScene);
-      mDecalRenderer->reset();
-      mCurrentScene = mSelectedScene;
-   }
-
    mDecalRenderer->setMaxNumDecals(mMaxNumDecals);
 
    if (mSelectedDecalScale != mCurrentDecalScale)
@@ -230,11 +217,6 @@ void PlayState::loadModels()
    mInvertedCubeMeshes = LoadStaticMeshes(data);
    FreeGLTFFile(data);
 
-   // Load the inverted icosphere
-   data = LoadGLTFFile("resources/models/inverted_icosphere/inverted_icosphere.glb");
-   mInvertedIcosphereMeshes = LoadStaticMeshes(data);
-   FreeGLTFFile(data);
-
    // Load the normal cube
    data = LoadGLTFFile("resources/models/cube/cube.glb");
    mNormalCubeMeshes = LoadStaticMeshes(data);
@@ -248,11 +230,6 @@ void PlayState::loadModels()
    // Load the normal inverted cube
    data = LoadGLTFFile("resources/models/inverted_cube/inverted_cube.glb");
    mNormalInvertedCubeMeshes = LoadStaticMeshes(data);
-   FreeGLTFFile(data);
-
-   // Load the normal inverted icosphere
-   data = LoadGLTFFile("resources/models/inverted_icosphere/inverted_icosphere.glb");
-   mNormalInvertedIcosphereMeshes = LoadStaticMeshes(data);
    FreeGLTFFile(data);
 
    int positionsAttribLoc = mDiffuseShader->getAttributeLocation("position");
@@ -293,16 +270,6 @@ void PlayState::loadModels()
    normalsAttribLoc   = mGouradShader->getAttributeLocation("normal");
    texCoordsAttribLoc = mGouradShader->getAttributeLocation("texCoord");
 
-   for (unsigned int i = 0,
-        size = static_cast<unsigned int>(mInvertedIcosphereMeshes.size());
-        i < size;
-        ++i)
-   {
-      mInvertedIcosphereMeshes[i].ConfigureVAO(positionsAttribLoc,
-                                               normalsAttribLoc,
-                                               texCoordsAttribLoc);
-   }
-
    mGouradShader->use(true);
    mGouradShader->setUniformVec3( "light.worldPos",  glm::vec3(0.0, 0.0f, 1.0f));
    mGouradShader->setUniformVec3( "light.color",     glm::vec3(1.0f));
@@ -342,16 +309,6 @@ void PlayState::loadModels()
                                                 normalsAttribLoc,
                                                 texCoordsAttribLoc);
    }
-
-   for (unsigned int i = 0,
-        size = static_cast<unsigned int>(mNormalInvertedIcosphereMeshes.size());
-        i < size;
-        ++i)
-   {
-      mNormalInvertedIcosphereMeshes[i].ConfigureVAO(positionsAttribLoc,
-                                                     normalsAttribLoc,
-                                                     texCoordsAttribLoc);
-   }
 }
 
 void PlayState::userInterface()
@@ -372,8 +329,6 @@ void PlayState::userInterface()
 
    if (ImGui::CollapsingHeader("Settings", nullptr, ImGuiTreeNodeFlags_DefaultOpen))
    {
-      ImGui::Combo("Scene", &mSelectedScene, mSceneNames.c_str());
-
       ImGui::RadioButton("Display final scene", &mDisplayMode, 0);
       ImGui::RadioButton("Display depth texture", &mDisplayMode, 1);
       ImGui::RadioButton("Display normal texture", &mDisplayMode, 2);
@@ -459,45 +414,23 @@ void PlayState::renderRigidBodies()
 
 void PlayState::renderWorld()
 {
-   if (mCurrentScene == 0) // Icosphere
+   mDiffuseShader->use(true);
+   mDiffuseShader->setUniformMat4("model",      glm::mat4(1.0f));
+   mDiffuseShader->setUniformMat4("view",       mCamera3.getViewMatrix());
+   mDiffuseShader->setUniformMat4("projection", mCamera3.getPerspectiveProjectionMatrix());
+   mInvertedCubeTexture->bind(0, mDiffuseShader->getUniformLocation("diffuseTex"));
+
+   // Loop over the inverted cube meshes and render each one
+   for (unsigned int i = 0,
+        size = static_cast<unsigned int>(mInvertedCubeMeshes.size());
+        i < size;
+        ++i)
    {
-      mGouradShader->use(true);
-      mGouradShader->setUniformMat4("model",        glm::mat4(1.0f));
-      mGouradShader->setUniformMat4("view",         mCamera3.getViewMatrix());
-      mGouradShader->setUniformMat4("projection",   mCamera3.getPerspectiveProjectionMatrix());
-      mGouradShader->setUniformVec3("diffuseColor", glm::vec3(1.0f));
-
-      // Loop over the inverted icosphere meshes and render each one
-      for (unsigned int i = 0,
-           size = static_cast<unsigned int>(mInvertedIcosphereMeshes.size());
-           i < size;
-           ++i)
-      {
-         mInvertedIcosphereMeshes[i].Render();
-      }
-
-      mGouradShader->use(false);
+      mInvertedCubeMeshes[i].Render();
    }
-   else if (mCurrentScene == 1) // Cube
-   {
-      mDiffuseShader->use(true);
-      mDiffuseShader->setUniformMat4("model",      glm::mat4(1.0f));
-      mDiffuseShader->setUniformMat4("view",       mCamera3.getViewMatrix());
-      mDiffuseShader->setUniformMat4("projection", mCamera3.getPerspectiveProjectionMatrix());
-      mInvertedCubeTexture->bind(0, mDiffuseShader->getUniformLocation("diffuseTex"));
 
-      // Loop over the inverted cube meshes and render each one
-      for (unsigned int i = 0,
-           size = static_cast<unsigned int>(mInvertedCubeMeshes.size());
-           i < size;
-           ++i)
-      {
-         mInvertedCubeMeshes[i].Render();
-      }
-
-      mInvertedCubeTexture->unbind(0);
-      mDiffuseShader->use(false);
-   }
+   mInvertedCubeTexture->unbind(0);
+   mDiffuseShader->use(false);
 }
 
 void PlayState::renderNormalsAndDepth()
@@ -509,25 +442,12 @@ void PlayState::renderNormalsAndDepth()
    mNormalAndDepthShader->setUniformMat3("normalMat",  glm::mat3(1.0f));
 
    // Loop over the normal inverted meshes and render each one
-   if (mCurrentScene == 0)
+   for (unsigned int i = 0,
+        size = static_cast<unsigned int>(mNormalInvertedCubeMeshes.size());
+        i < size;
+        ++i)
    {
-      for (unsigned int i = 0,
-           size = static_cast<unsigned int>(mNormalInvertedIcosphereMeshes.size());
-           i < size;
-           ++i)
-      {
-         mNormalInvertedIcosphereMeshes[i].Render();
-      }
-   }
-   else if (mCurrentScene == 1)
-   {
-      for (unsigned int i = 0,
-           size = static_cast<unsigned int>(mNormalInvertedCubeMeshes.size());
-           i < size;
-           ++i)
-      {
-         mNormalInvertedCubeMeshes[i].Render();
-      }
+      mNormalInvertedCubeMeshes[i].Render();
    }
 
    if (mDisplayMode == 1 || mDisplayMode == 2) // Normal or depth

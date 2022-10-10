@@ -22,8 +22,6 @@ public:
 
    const std::vector<RigidBody>& getRigidBodies() const { return mRigidBodies; };
 
-   void changeScene(int sceneIndex);
-
 private:
 
    enum class CollisionState : unsigned int
@@ -46,9 +44,10 @@ private:
 
    std::vector<Triangle>         getTrianglesFromMeshes(std::vector<SimpleMesh>& meshes);
 
+   void                          reset();
+
    std::vector<RigidBody>             mRigidBodies;
-   std::vector<std::vector<Triangle>> mWorldTriangles;
-   int                                mCurrentScene;
+   std::vector<Triangle>              mWorldTriangles;
 
    CollisionState                     mCollisionState;
    int                                mCollidingRigidBodyIndex;

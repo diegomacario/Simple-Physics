@@ -61,19 +61,14 @@ private:
    std::shared_ptr<Texture>               mPlaneTexture;
    std::vector<AnimatedMesh>              mInvertedCubeMeshes;
    std::shared_ptr<Texture>               mInvertedCubeTexture;
-   std::vector<AnimatedMesh>              mInvertedIcosphereMeshes;
    std::vector<AnimatedMesh>              mNormalCubeMeshes;
    std::vector<AnimatedMesh>              mNormalPlaneMeshes;
    std::vector<AnimatedMesh>              mNormalInvertedCubeMeshes;
-   std::vector<AnimatedMesh>              mNormalInvertedIcosphereMeshes;
 
    std::shared_ptr<DecalRenderer>         mDecalRenderer;
 
    World                                  mWorld;
 
-   std::string                            mSceneNames;
-   int                                    mCurrentScene = 0;
-   int                                    mSelectedScene = 0;
    float                                  mPlaybackSpeed = 1.0f;
    int                                    mDisplayMode = 0;
    int                                    mMaxNumDecals = 100;
