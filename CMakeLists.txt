@@ -23,9 +23,7 @@ set(project_headers
     inc/Interpolation.h
     inc/PlayState.h
     inc/Quat.h
-    inc/Ray.h
     inc/ResourceManager.h
-    inc/RigidBody.h
     inc/Shader.h
     inc/ShaderLoader.h
     inc/SimpleMesh.h
@@ -34,10 +32,7 @@ set(project_headers
     inc/TextureLoader.h
     inc/Track.h
     inc/Transform.h
-    inc/Triangle.h
-    inc/Wall.h
-    inc/Window.h
-    inc/World.h)
+    inc/Window.h)
 
 set(project_sources
     src/AnimatedMesh.cpp
@@ -50,8 +45,6 @@ set(project_sources
     src/main.cpp
     src/PlayState.cpp
     src/Quat.cpp
-    src/Ray.cpp
-    src/RigidBody.cpp
     src/Shader.cpp
     src/ShaderLoader.cpp
     src/SimpleMesh.cpp
@@ -59,10 +52,7 @@ set(project_sources
     src/TextureLoader.cpp
     src/Track.cpp
     src/Transform.cpp
-    src/Triangle.cpp
-    src/Wall.cpp
     src/Window.cpp
-    src/World.cpp
     dependencies/cgltf/cgltf/cgltf.c
     dependencies/imgui/imgui/imgui.cpp
     dependencies/imgui/imgui/imgui_demo.cpp

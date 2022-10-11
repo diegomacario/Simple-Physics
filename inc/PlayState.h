@@ -9,7 +9,6 @@
 #include "AnimatedMesh.h"
 #include "Texture.h"
 #include "DecalRenderer.h"
-#include "World.h"
 
 class PlayState : public State
 {
