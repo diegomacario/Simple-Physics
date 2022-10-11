@@ -54,12 +54,10 @@ private:
    std::shared_ptr<Shader>                mGouradShader;
    std::shared_ptr<Shader>                mNormalAndDepthShader;
 
-   std::vector<AnimatedMesh>              mCubeMeshes;
-   std::shared_ptr<Texture>               mCubeTexture;
    std::vector<AnimatedMesh>              mPlaneMeshes;
    std::shared_ptr<Texture>               mPlaneTexture;
-   std::vector<AnimatedMesh>              mNormalCubeMeshes;
    std::vector<AnimatedMesh>              mNormalPlaneMeshes;
+   Transform                              mPlaneModelTransform;
 
    std::shared_ptr<DecalRenderer>         mDecalRenderer;
 

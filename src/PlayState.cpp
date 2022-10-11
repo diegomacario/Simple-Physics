@@ -16,8 +16,9 @@ PlayState::PlayState(const std::shared_ptr<FiniteStateMachine>& finiteStateMachi
                      const std::shared_ptr<Window>&             window)
    : mFSM(finiteStateMachine)
    , mWindow(window)
-   , mCamera3(4.5f, 0.0f, glm::vec3(0.0f), Q::quat(), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, 10.0f, -90.0f, 90.0f, 45.0f, 1280.0f / 720.0f, 0.1f, 130.0f, 0.25f)
+   , mCamera3(4.5f, 35.0f, glm::vec3(0.0f), Q::quat(), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, 10.0f, -90.0f, 90.0f, 45.0f, 1280.0f / 720.0f, 0.1f, 130.0f, 0.25f)
    , mDecalRenderer(std::make_shared<DecalRenderer>(window->getWidthOfFramebufferInPix(), window->getHeightOfFramebufferInPix()))
+   , mPlaneModelTransform(glm::vec3(0.0f), Q::quat(), glm::vec3(3.0f))
 {
    // Initialize the diffuse shader
    mDiffuseShader = ResourceManager<Shader>().loadUnmanagedResource<ShaderLoader>("resources/shaders/diffuse.vert",
@@ -34,6 +35,12 @@ PlayState::PlayState(const std::shared_ptr<FiniteStateMachine>& finiteStateMachi
    loadModels();
 
    mWindow->setDecalRenderer(mDecalRenderer);
+
+   mDecalRenderer->addDecal(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+   mDecalRenderer->addDecal(glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+   mDecalRenderer->addDecal(glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+   mDecalRenderer->addDecal(glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+   mDecalRenderer->addDecal(glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 }
 
 void PlayState::initializeState()
@@ -187,25 +194,12 @@ void PlayState::exit()
 
 void PlayState::loadModels()
 {
-   // Load the texture of the cube
-   mCubeTexture = ResourceManager<Texture>().loadUnmanagedResource<TextureLoader>("resources/models/cube/cube.png");
-
-   // Load the cube
-   cgltf_data* data = LoadGLTFFile("resources/models/cube/cube.glb");
-   mCubeMeshes = LoadStaticMeshes(data);
-   FreeGLTFFile(data);
-
    // Load the texture of the plane
    mPlaneTexture = ResourceManager<Texture>().loadUnmanagedResource<TextureLoader>("resources/models/plane/plane.png");
 
    // Load the plane
-   data = LoadGLTFFile("resources/models/plane/world_plane.glb");
+   cgltf_data* data = LoadGLTFFile("resources/models/plane/world_plane.glb");
    mPlaneMeshes = LoadStaticMeshes(data);
-   FreeGLTFFile(data);
-
-   // Load the normal cube
-   data = LoadGLTFFile("resources/models/cube/cube.glb");
-   mNormalCubeMeshes = LoadStaticMeshes(data);
    FreeGLTFFile(data);
 
    // Load the normal plane
@@ -216,16 +210,6 @@ void PlayState::loadModels()
    int positionsAttribLoc = mDiffuseShader->getAttributeLocation("position");
    int normalsAttribLoc   = mDiffuseShader->getAttributeLocation("normal");
    int texCoordsAttribLoc = mDiffuseShader->getAttributeLocation("texCoord");
-
-   for (unsigned int i = 0,
-        size = static_cast<unsigned int>(mCubeMeshes.size());
-        i < size;
-        ++i)
-   {
-      mCubeMeshes[i].ConfigureVAO(positionsAttribLoc,
-                                  normalsAttribLoc,
-                                  texCoordsAttribLoc);
-   }
 
    for (unsigned int i = 0,
         size = static_cast<unsigned int>(mPlaneMeshes.size());
@@ -250,16 +234,6 @@ void PlayState::loadModels()
    positionsAttribLoc = mNormalAndDepthShader->getAttributeLocation("position");
    normalsAttribLoc   = mNormalAndDepthShader->getAttributeLocation("normal");
    texCoordsAttribLoc = mNormalAndDepthShader->getAttributeLocation("texCoord");
-
-   for (unsigned int i = 0,
-        size = static_cast<unsigned int>(mNormalCubeMeshes.size());
-        i < size;
-        ++i)
-   {
-      mNormalCubeMeshes[i].ConfigureVAO(positionsAttribLoc,
-                                        normalsAttribLoc,
-                                        texCoordsAttribLoc);
-   }
 
    for (unsigned int i = 0,
         size = static_cast<unsigned int>(mNormalPlaneMeshes.size());
@@ -330,19 +304,19 @@ void PlayState::userInterface()
 
 void PlayState::resetCamera()
 {
-   mCamera3.reposition(4.5f, 0.0f, glm::vec3(0.0f), Q::quat(), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, 10.0f, -90.0f, 90.0f);
+   mCamera3.reposition(4.5f, 35.0f, glm::vec3(0.0f), Q::quat(), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, 10.0f, -90.0f, 90.0f);
    mCamera3.processMouseMovement(180.0f / 0.25f, 0.0f);
 }
 
 void PlayState::renderWorld()
 {
    mDiffuseShader->use(true);
-   mDiffuseShader->setUniformMat4("model",      glm::mat4(1.0f));
+   mDiffuseShader->setUniformMat4("model",      transformToMat4(mPlaneModelTransform));
    mDiffuseShader->setUniformMat4("view",       mCamera3.getViewMatrix());
    mDiffuseShader->setUniformMat4("projection", mCamera3.getPerspectiveProjectionMatrix());
    mPlaneTexture->bind(0, mDiffuseShader->getUniformLocation("diffuseTex"));
 
-   // Loop over the inverted cube meshes and render each one
+   // Loop over the plane meshes and render each one
    for (unsigned int i = 0,
         size = static_cast<unsigned int>(mPlaneMeshes.size());
         i < size;
@@ -358,12 +332,12 @@ void PlayState::renderWorld()
 void PlayState::renderNormalsAndDepth()
 {
    mNormalAndDepthShader->use(true);
-   mNormalAndDepthShader->setUniformMat4("model",      glm::mat4(1.0f));
+   mNormalAndDepthShader->setUniformMat4("model",      transformToMat4(mPlaneModelTransform));
    mNormalAndDepthShader->setUniformMat4("view",       mCamera3.getViewMatrix());
    mNormalAndDepthShader->setUniformMat4("projection", mCamera3.getPerspectiveProjectionMatrix());
    mNormalAndDepthShader->setUniformMat3("normalMat",  glm::mat3(1.0f));
 
-   // Loop over the normal inverted meshes and render each one
+   // Loop over the normal plane meshes and render each one
    for (unsigned int i = 0,
         size = static_cast<unsigned int>(mNormalPlaneMeshes.size());
         i < size;

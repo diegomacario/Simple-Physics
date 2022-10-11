@@ -36,10 +36,10 @@ void World::initializeRigidBodies()
 void World::initializeWorldTriangles()
 {
    cgltf_data* data = LoadGLTFFile("resources/models/plane/plane.glb");
-   std::vector<SimpleMesh> invertedCubeMeshes = LoadSimpleMeshes(data);
+   std::vector<SimpleMesh> planeMeshes = LoadSimpleMeshes(data);
    FreeGLTFFile(data);
 
-   mWorldTriangles = getTrianglesFromMeshes(invertedCubeMeshes);
+   mWorldTriangles = getTrianglesFromMeshes(planeMeshes);
 }
 
 bool World::simulate(float deltaTime, bool gravity, int velocityChange)
