@@ -18,7 +18,7 @@ PlayState::PlayState(const std::shared_ptr<FiniteStateMachine>& finiteStateMachi
    , mWindow(window)
    , mCamera3(4.5f, 35.0f, glm::vec3(0.0f), Q::quat(), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, 10.0f, -90.0f, 90.0f, 45.0f, 1280.0f / 720.0f, 0.1f, 130.0f, 0.25f)
    , mDecalRenderer(std::make_shared<DecalRenderer>(window->getWidthOfFramebufferInPix(), window->getHeightOfFramebufferInPix()))
-   , mPlaneModelTransform(glm::vec3(0.0f), Q::quat(), glm::vec3(3.0f))
+   , mPlaneModelTransform(glm::vec3(0.0f), Q::quat(), glm::vec3(3.0f)) // DANDY: Cambia glm::vec3(3.0f) para cambiar la escala del plano
 {
    // Initialize the diffuse shader
    mDiffuseShader = ResourceManager<Shader>().loadUnmanagedResource<ShaderLoader>("resources/shaders/diffuse.vert",
@@ -37,6 +37,7 @@ PlayState::PlayState(const std::shared_ptr<FiniteStateMachine>& finiteStateMachi
    mWindow->setDecalRenderer(mDecalRenderer);
 
    mDecalRenderer->addDecal(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+   // DANDY: Comenta estas lineas para solo ver 1 decal
    mDecalRenderer->addDecal(glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
    mDecalRenderer->addDecal(glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
    mDecalRenderer->addDecal(glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
@@ -133,6 +134,13 @@ void PlayState::update(float deltaTime)
    mDecalRenderer->setNormalThreshold(mDecalNormalThreshold);
 
    mDecalRenderer->updateDecals(mPlaybackSpeed);
+
+   // DANDY: Cambia el 0 abajo a otro valor para mover otro decal. Ese es el indice del decal que se va a mover
+   mDecalRenderer->moveDecal(0,
+                             mWindow->keyIsPressed(GLFW_KEY_W),
+                             mWindow->keyIsPressed(GLFW_KEY_A),
+                             mWindow->keyIsPressed(GLFW_KEY_S),
+                             mWindow->keyIsPressed(GLFW_KEY_D));
 }
 
 void PlayState::render()

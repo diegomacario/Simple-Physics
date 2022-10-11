@@ -96,3 +96,38 @@ void Decal::updateScale(float scale)
    mModelMatrix          = transformToMat4(mModelTransform);
    mInverseModelMatrix   = glm::inverse(mModelMatrix);
 }
+
+void Decal::move(bool wKeyIsPressed, bool aKeyIsPressed, bool sKeyIsPressed, bool dKeyIsPressed)
+{
+   float horizontalInput = 0.0f;
+   float verticalInput   = 0.0f;
+
+   if (wKeyIsPressed)
+   {
+      verticalInput -= 0.05f;
+   }
+   else if (sKeyIsPressed)
+   {
+      verticalInput += 0.05f;
+   }
+
+   if (aKeyIsPressed)
+   {
+      horizontalInput -= 0.05f;
+   }
+   else if (dKeyIsPressed)
+   {
+      horizontalInput += 0.05f;
+   }
+
+   mModelTransform.position += glm::vec3(horizontalInput, 0.0f, verticalInput);
+   mModelMatrix              = transformToMat4(mModelTransform);
+   mInverseModelMatrix       = glm::inverse(mModelMatrix);
+
+   for (int i = 0; i < 4; ++i)
+   {
+      mCircleModelTransforms[i].position += glm::vec3(horizontalInput, 0.0f, verticalInput);
+      mCircleModelMatrices[i]             = transformToMat4(mCircleModelTransforms[i]);
+      mCircleInverseModelMatrices[i]      = glm::inverse(mCircleModelMatrices[i]);
+   }
+}

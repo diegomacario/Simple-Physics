@@ -38,6 +38,8 @@ public:
    void         setDelayBetweenCircles(float delay) { mDelayBetweenCircles = delay; }
    void         setDecalBounce(float bounce);
 
+   void         moveDecal(unsigned int decalIndex, bool wKeyIsPressed, bool aKeyIsPressed, bool sKeyIsPressed, bool dKeyIsPressed);
+
 private:
 
    void         configureDecalFBO();

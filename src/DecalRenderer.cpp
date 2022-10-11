@@ -243,6 +243,23 @@ void DecalRenderer::setDecalBounce(float bounce)
    frame0.mOutSlope[0] = bounce;
 }
 
+void DecalRenderer::moveDecal(unsigned int decalIndex, bool wKeyIsPressed, bool aKeyIsPressed, bool sKeyIsPressed, bool dKeyIsPressed)
+{
+   unsigned int decalCounter = 0;
+   std::list<Decal>::iterator decalIter = mDecals.begin();
+   while (decalIter != mDecals.end())
+   {
+      if (decalCounter == decalIndex)
+      {
+         decalIter->move(wKeyIsPressed, aKeyIsPressed, sKeyIsPressed, dKeyIsPressed);
+         break;
+      }
+
+      ++decalCounter;
+      ++decalIter;
+   }
+}
+
 void DecalRenderer::configureDecalFBO()
 {
    glGenFramebuffers(1, &mDecalFBO);

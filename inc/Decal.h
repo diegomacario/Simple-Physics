@@ -27,6 +27,8 @@ public:
 
    void                            updateScale(float scale);
 
+   void                            move(bool wKeyIsPressed, bool aKeyIsPressed, bool sKeyIsPressed, bool dKeyIsPressed);
+
 private:
 
    Transform                mModelTransform;
