@@ -41,7 +41,6 @@ private:
 
    void resetCamera();
 
-   void renderRigidBodies();
    void renderWorld();
    void renderNormalsAndDepth();
 
@@ -59,15 +58,10 @@ private:
    std::shared_ptr<Texture>               mCubeTexture;
    std::vector<AnimatedMesh>              mPlaneMeshes;
    std::shared_ptr<Texture>               mPlaneTexture;
-   std::vector<AnimatedMesh>              mInvertedCubeMeshes;
-   std::shared_ptr<Texture>               mInvertedCubeTexture;
    std::vector<AnimatedMesh>              mNormalCubeMeshes;
    std::vector<AnimatedMesh>              mNormalPlaneMeshes;
-   std::vector<AnimatedMesh>              mNormalInvertedCubeMeshes;
 
    std::shared_ptr<DecalRenderer>         mDecalRenderer;
-
-   World                                  mWorld;
 
    float                                  mPlaybackSpeed = 1.0f;
    int                                    mDisplayMode = 0;
@@ -81,8 +75,6 @@ private:
    float                                  mSelectedDecalBounce = 4.5f;
    bool                                   mDisplayDecalOBBs = false;
    bool                                   mDisplayDiscardedDecalParts = false;
-   bool                                   mGravity = false;
-   int                                    mVelocityChange = 0; // 0 = No change, 1 = Increase, 2 = Decrease
 };
 
 #endif

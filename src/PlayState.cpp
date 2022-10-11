@@ -18,7 +18,6 @@ PlayState::PlayState(const std::shared_ptr<FiniteStateMachine>& finiteStateMachi
    , mWindow(window)
    , mCamera3(4.5f, 0.0f, glm::vec3(0.0f), Q::quat(), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, 10.0f, -90.0f, 90.0f, 45.0f, 1280.0f / 720.0f, 0.1f, 130.0f, 0.25f)
    , mDecalRenderer(std::make_shared<DecalRenderer>(window->getWidthOfFramebufferInPix(), window->getHeightOfFramebufferInPix()))
-   , mWorld(mDecalRenderer)
 {
    // Initialize the diffuse shader
    mDiffuseShader = ResourceManager<Shader>().loadUnmanagedResource<ShaderLoader>("resources/shaders/diffuse.vert",
@@ -126,10 +125,6 @@ void PlayState::update(float deltaTime)
 
    mDecalRenderer->setNormalThreshold(mDecalNormalThreshold);
 
-   // TODO: Handle simulation errors
-   mWorld.simulate(deltaTime * mPlaybackSpeed, mGravity, mVelocityChange);
-   mVelocityChange = 0;
-
    mDecalRenderer->updateDecals(mPlaybackSpeed);
 }
 
@@ -164,7 +159,6 @@ void PlayState::render()
       mDecalRenderer->renderDecals(mCamera3.getViewMatrix(), mCamera3.getPerspectiveProjectionMatrix(), mDisplayDecalOBBs, mDisplayDiscardedDecalParts);
       glDisable(GL_BLEND);
       glEnable(GL_DEPTH_TEST);
-      renderRigidBodies();
    }
    else if (mDisplayMode == 1) // Depth
    {
@@ -205,16 +199,8 @@ void PlayState::loadModels()
    mPlaneTexture = ResourceManager<Texture>().loadUnmanagedResource<TextureLoader>("resources/models/plane/plane.png");
 
    // Load the plane
-   data = LoadGLTFFile("resources/models/plane/plane.glb");
+   data = LoadGLTFFile("resources/models/plane/world_plane.glb");
    mPlaneMeshes = LoadStaticMeshes(data);
-   FreeGLTFFile(data);
-
-   // Load the texture of the inverted cube
-   mInvertedCubeTexture = ResourceManager<Texture>().loadUnmanagedResource<TextureLoader>("resources/models/inverted_cube/inverted_cube.png");
-
-   // Load the inverted cube
-   data = LoadGLTFFile("resources/models/inverted_cube/inverted_cube.glb");
-   mInvertedCubeMeshes = LoadStaticMeshes(data);
    FreeGLTFFile(data);
 
    // Load the normal cube
@@ -223,13 +209,8 @@ void PlayState::loadModels()
    FreeGLTFFile(data);
 
    // Load the normal plane
-   data = LoadGLTFFile("resources/models/plane/plane.glb");
+   data = LoadGLTFFile("resources/models/plane/world_plane.glb");
    mNormalPlaneMeshes = LoadStaticMeshes(data);
-   FreeGLTFFile(data);
-
-   // Load the normal inverted cube
-   data = LoadGLTFFile("resources/models/inverted_cube/inverted_cube.glb");
-   mNormalInvertedCubeMeshes = LoadStaticMeshes(data);
    FreeGLTFFile(data);
 
    int positionsAttribLoc = mDiffuseShader->getAttributeLocation("position");
@@ -254,16 +235,6 @@ void PlayState::loadModels()
       mPlaneMeshes[i].ConfigureVAO(positionsAttribLoc,
                                    normalsAttribLoc,
                                    texCoordsAttribLoc);
-   }
-
-   for (unsigned int i = 0,
-        size = static_cast<unsigned int>(mInvertedCubeMeshes.size());
-        i < size;
-        ++i)
-   {
-      mInvertedCubeMeshes[i].ConfigureVAO(positionsAttribLoc,
-                                          normalsAttribLoc,
-                                          texCoordsAttribLoc);
    }
 
    positionsAttribLoc = mGouradShader->getAttributeLocation("position");
@@ -298,16 +269,6 @@ void PlayState::loadModels()
       mNormalPlaneMeshes[i].ConfigureVAO(positionsAttribLoc,
                                          normalsAttribLoc,
                                          texCoordsAttribLoc);
-   }
-
-   for (unsigned int i = 0,
-        size = static_cast<unsigned int>(mNormalInvertedCubeMeshes.size());
-        i < size;
-        ++i)
-   {
-      mNormalInvertedCubeMeshes[i].ConfigureVAO(positionsAttribLoc,
-                                                normalsAttribLoc,
-                                                texCoordsAttribLoc);
    }
 }
 
@@ -364,18 +325,6 @@ void PlayState::userInterface()
 #endif
    }
 
-   ImGui::Checkbox("Gravity", &mGravity);
-
-   if (ImGui::Button("Double velocity"))
-   {
-      mVelocityChange = 1;
-   }
-
-   if (ImGui::Button("Halve velocity"))
-   {
-      mVelocityChange = 2;
-   }
-
    ImGui::End();
 }
 
@@ -385,51 +334,24 @@ void PlayState::resetCamera()
    mCamera3.processMouseMovement(180.0f / 0.25f, 0.0f);
 }
 
-void PlayState::renderRigidBodies()
-{
-   mDiffuseShader->use(true);
-   mDiffuseShader->setUniformMat4("view",       mCamera3.getViewMatrix());
-   mDiffuseShader->setUniformMat4("projection", mCamera3.getPerspectiveProjectionMatrix());
-   mCubeTexture->bind(0, mDiffuseShader->getUniformLocation("diffuseTex"));
-
-   // Loop over the rigid bodies and render each one
-   const std::vector<RigidBody>& rigidBodies = mWorld.getRigidBodies();
-   for (const RigidBody& rigidBody : rigidBodies)
-   {
-      mDiffuseShader->setUniformMat4("model", rigidBody.getModelMatrix(current));
-
-      // Loop over the cube meshes and render each one
-      for (unsigned int i = 0,
-           size = static_cast<unsigned int>(mCubeMeshes.size());
-           i < size;
-           ++i)
-      {
-         mCubeMeshes[i].Render();
-      }
-   }
-
-   mCubeTexture->unbind(0);
-   mDiffuseShader->use(false);
-}
-
 void PlayState::renderWorld()
 {
    mDiffuseShader->use(true);
    mDiffuseShader->setUniformMat4("model",      glm::mat4(1.0f));
    mDiffuseShader->setUniformMat4("view",       mCamera3.getViewMatrix());
    mDiffuseShader->setUniformMat4("projection", mCamera3.getPerspectiveProjectionMatrix());
-   mInvertedCubeTexture->bind(0, mDiffuseShader->getUniformLocation("diffuseTex"));
+   mPlaneTexture->bind(0, mDiffuseShader->getUniformLocation("diffuseTex"));
 
    // Loop over the inverted cube meshes and render each one
    for (unsigned int i = 0,
-        size = static_cast<unsigned int>(mInvertedCubeMeshes.size());
+        size = static_cast<unsigned int>(mPlaneMeshes.size());
         i < size;
         ++i)
    {
-      mInvertedCubeMeshes[i].Render();
+      mPlaneMeshes[i].Render();
    }
 
-   mInvertedCubeTexture->unbind(0);
+   mPlaneTexture->unbind(0);
    mDiffuseShader->use(false);
 }
 
@@ -443,31 +365,11 @@ void PlayState::renderNormalsAndDepth()
 
    // Loop over the normal inverted meshes and render each one
    for (unsigned int i = 0,
-        size = static_cast<unsigned int>(mNormalInvertedCubeMeshes.size());
+        size = static_cast<unsigned int>(mNormalPlaneMeshes.size());
         i < size;
         ++i)
    {
-      mNormalInvertedCubeMeshes[i].Render();
-   }
-
-   if (mDisplayMode == 1 || mDisplayMode == 2) // Normal or depth
-   {
-      // Loop over the rigid bodies and render each one
-      const std::vector<RigidBody>& rigidBodies = mWorld.getRigidBodies();
-      for (const RigidBody& rigidBody : rigidBodies)
-      {
-         mNormalAndDepthShader->setUniformMat4("model", rigidBody.getModelMatrix(current));
-         mNormalAndDepthShader->setUniformMat3("normalMat", glm::mat3(glm::transpose(glm::inverse(rigidBody.getModelMatrix(current)))));
-
-         // Loop over the normal cube meshes and render each one
-         for (unsigned int i = 0,
-              size = static_cast<unsigned int>(mNormalCubeMeshes.size());
-              i < size;
-              ++i)
-         {
-            mNormalCubeMeshes[i].Render();
-         }
-      }
+      mNormalPlaneMeshes[i].Render();
    }
 
    mNormalAndDepthShader->use(false);

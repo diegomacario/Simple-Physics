@@ -289,7 +289,7 @@ unsigned int DecalRenderer::createDepthTextureAttachment()
 
 void DecalRenderer::loadQuad()
 {
-   cgltf_data* data = LoadGLTFFile("resources/models/plane/plane.glb");
+   cgltf_data* data = LoadGLTFFile("resources/models/plane/screen_plane.glb");
    mQuadMeshes = LoadStaticMeshes(data);
    FreeGLTFFile(data);
 

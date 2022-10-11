@@ -35,7 +35,7 @@ void World::initializeRigidBodies()
 
 void World::initializeWorldTriangles()
 {
-   cgltf_data* data = LoadGLTFFile("resources/models/inverted_cube/inverted_cube.glb");
+   cgltf_data* data = LoadGLTFFile("resources/models/plane/plane.glb");
    std::vector<SimpleMesh> invertedCubeMeshes = LoadSimpleMeshes(data);
    FreeGLTFFile(data);
 
