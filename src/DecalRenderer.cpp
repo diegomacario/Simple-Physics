@@ -479,7 +479,7 @@ void DecalRenderer::renderStableDecals()
          mCubeMeshes[meshIndex].Render();
       }
 
-      mCircleTextures[decalIter->getDecalIndex()]->unbind(2);
+      mDecalTextures[decalIter->getDecalIndex()]->unbind(2);
    }
 }
 

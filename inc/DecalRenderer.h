@@ -1,8 +1,9 @@
 #ifndef DECAL_RENDERER_H
 #define DECAL_RENDERER_H
 
-#include <list>
 #include <deque>
+#include <list>
+#include <memory>
 
 #include "Shader.h"
 #include "AnimatedMesh.h"
