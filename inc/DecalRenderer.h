@@ -13,84 +13,70 @@
 class DecalRenderer
 {
 public:
-
    DecalRenderer(unsigned int widthOfFramebuffer, unsigned int heightOfFramebuffer);
    ~DecalRenderer();
 
-   DecalRenderer(const DecalRenderer&) = delete;
-   DecalRenderer& operator=(const DecalRenderer&) = delete;
+   DecalRenderer(const DecalRenderer &) = delete;
+   DecalRenderer &operator=(const DecalRenderer &) = delete;
 
-   DecalRenderer(DecalRenderer&& rhs) = delete;
-   DecalRenderer& operator=(DecalRenderer&& rhs) = delete;
+   DecalRenderer(DecalRenderer &&rhs) = delete;
+   DecalRenderer &operator=(DecalRenderer &&rhs) = delete;
 
-   void         bindDecalFBO();
-   void         unbindDecalFBO();
-   void         renderDecals(const glm::mat4& viewMatrix, const glm::mat4& perspectiveProjectionMatrix, bool displayDecalOBBs, bool displayDiscardedDecalParts);
-   void         renderNormalTextureToFullScreenQuad();
-   void         renderDepthTextureToFullScreenQuad();
-   void         resizeTextures(unsigned int widthOfFramebuffer, unsigned int heightOfFramebuffer);
-   void         addDecal(const glm::vec3& decalPosition, const glm::vec3& decalNormal);
-   void         updateDecals(float playbackSpeed);
-   void         reset();
+   void bindDecalFBO();
+   void unbindDecalFBO();
+   void renderDecals(const glm::mat4 &viewMatrix, const glm::mat4 &perspectiveProjectionMatrix, bool displayDecalOBBs, bool displayDiscardedDecalParts);
+   void addDecal(const glm::vec3 &decalPosition, const glm::vec3 &decalNormal);
+   void updateDecals(float playbackSpeed);
+   void reset();
 
-   void         setMaxNumDecals(int maxNumDecals) { mMaxNumDecals = maxNumDecals; }
-   void         setDecalScale(float scale);
-   void         setNormalThreshold(float normalThreshold) { mNormalThreshold = glm::cos(glm::radians(normalThreshold)); }
-   void         setDelayBetweenCircles(float delay) { mDelayBetweenCircles = delay; }
-   void         setDecalBounce(float bounce);
+   void setMaxNumDecals(int maxNumDecals) { mMaxNumDecals = maxNumDecals; }
+   void setDecalScale(float scale);
+   void setNormalThreshold(float normalThreshold) { mNormalThreshold = glm::cos(glm::radians(normalThreshold)); }
+   void setDelayBetweenCircles(float delay) { mDelayBetweenCircles = delay; }
+   void setDecalBounce(float bounce);
 
 private:
+   void loadCube();
+   void composeGrowAnimation();
+   void composeShrinkAnimation();
 
-   void         configureDecalFBO();
+   void updateGrowingDecals(float playbackSpeed);
+   void updateStableDecals();
+   void updateShrinkingDecals(float playbackSpeed);
 
-   unsigned int createColorTextureAttachment();
-   unsigned int createDepthTextureAttachment();
+   void renderAnimatedDecals(const std::deque<std::list<Decal>::iterator> &decals);
+   void renderStableDecals();
 
-   void         loadQuad();
-   void         loadCube();
-   void         composeGrowAnimation();
-   void         composeShrinkAnimation();
+   glm::vec3 hexToColor(int hex);
 
-   void         updateGrowingDecals(float playbackSpeed);
-   void         updateStableDecals();
-   void         updateShrinkingDecals(float playbackSpeed);
+   unsigned int mWidthOfFramebuffer;
+   unsigned int mHeightOfFramebuffer;
+   unsigned int mDecalFBO;
+   unsigned int mNormalTexture;
+   unsigned int mDepthTexture;
 
-   void         renderAnimatedDecals(const std::deque<std::list<Decal>::iterator>& decals);
-   void         renderStableDecals();
+   float mNormalThreshold;
 
-   glm::vec3    hexToColor(int hex);
+   std::shared_ptr<Shader> mDecalShader;
 
-   unsigned int                             mWidthOfFramebuffer;
-   unsigned int                             mHeightOfFramebuffer;
-   unsigned int                             mDecalFBO;
-   unsigned int                             mNormalTexture;
-   unsigned int                             mDepthTexture;
-
-   float                                    mNormalThreshold;
-
-   std::shared_ptr<Shader>                  mFullScreenQuadWithNormalTextureShader;
-   std::shared_ptr<Shader>                  mFullScreenQuadWithDepthTextureShader;
-   std::shared_ptr<Shader>                  mDecalShader;
-
-   std::vector<AnimatedMesh>                mQuadMeshes;
-   std::vector<AnimatedMesh>                mCubeMeshes;
+   std::vector<AnimatedMesh> mCubeMeshes;
 
    std::array<std::shared_ptr<Texture>, 20> mDecalTextures;
-   std::array<std::shared_ptr<Texture>, 4>  mCircleTextures;
+   std::array<std::shared_ptr<Texture>, 4> mCircleTextures;
    std::array<std::array<glm::vec3, 4>, 20> mCircleColors;
 
-   std::list<Decal>                         mDecals;
-   std::deque<std::list<Decal>::iterator>   mGrowingDecals;
-   std::deque<std::list<Decal>::iterator>   mStableDecals;
-   std::deque<std::list<Decal>::iterator>   mShrinkingDecals;
+   std::list<Decal> mDecals;
+   std::deque<std::list<Decal>::iterator> mGrowingDecals;
+   std::deque<std::list<Decal>::iterator> mStableDecals;
+   std::deque<std::list<Decal>::iterator> mShrinkingDecals;
 
-   ScalarTrack                              mGrowAnimation;
-   ScalarTrack                              mShrinkAnimation;
+   ScalarTrack mGrowAnimation;
+   ScalarTrack mShrinkAnimation;
 
-   unsigned int                             mDecalIndex;
+   unsigned int mDecalIndex;
 
-   int                                      mMaxNumDecals;
-   float                                    mDelayBetweenCircles;
+   int mMaxNumDecals;
+   float mDelayBetweenCircles;
 };
 
 #endif
