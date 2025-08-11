@@ -16,66 +16,6 @@
 DecalRenderer::DecalRenderer(unsigned int widthOfFramebuffer, unsigned int heightOfFramebuffer)
     : mWidthOfFramebuffer(widthOfFramebuffer), mHeightOfFramebuffer(heightOfFramebuffer), mDecalFBO(0), mNormalTexture(0), mDepthTexture(0), mNormalThreshold(glm::cos(glm::radians(89.0f))), mDecalIndex(0), mMaxNumDecals(100), mDelayBetweenCircles(0.1f)
 {
-   // Initialize the decal shader
-   mDecalShader = ResourceManager<Shader>().loadUnmanagedResource<ShaderLoader>("resources/shaders/decal.vert", "resources/shaders/decal.frag");
-
-   // Load the textures of the stable decals
-   for (int i = 0; i < 20; ++i)
-   {
-      std::string decalPath = "resources/models/decals/circles_" + std::to_string(i) + ".png";
-      mDecalTextures[i] = ResourceManager<Texture>().loadUnmanagedResource<TextureLoader>(decalPath, nullptr, nullptr, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_LINEAR, GL_LINEAR, false);
-   }
-
-   // Load the textures of the animated decals
-   mCircleTextures = {
-       ResourceManager<Texture>().loadUnmanagedResource<TextureLoader>("resources/models/decals/circle_0.png", nullptr, nullptr, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_LINEAR, GL_LINEAR, false),
-       ResourceManager<Texture>().loadUnmanagedResource<TextureLoader>("resources/models/decals/circle_1.png", nullptr, nullptr, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_LINEAR, GL_LINEAR, false),
-       ResourceManager<Texture>().loadUnmanagedResource<TextureLoader>("resources/models/decals/circle_2.png", nullptr, nullptr, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_LINEAR, GL_LINEAR, false),
-       ResourceManager<Texture>().loadUnmanagedResource<TextureLoader>("resources/models/decals/circle_3.png", nullptr, nullptr, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_LINEAR, GL_LINEAR, false)};
-
-   // Load the colors of the animated decals
-   mCircleColors = {
-       std::array<glm::vec3, 4>{hexToColor(0x6A2C70), hexToColor(0xB83B5E), hexToColor(0xF08A5D), hexToColor(0xF9ED69)},
-       std::array<glm::vec3, 4>{hexToColor(0xF9ED69), hexToColor(0xF08A5D), hexToColor(0xB83B5E), hexToColor(0x6A2C70)},
-       std::array<glm::vec3, 4>{hexToColor(0x2D4059), hexToColor(0xEA5455), hexToColor(0xF07B3F), hexToColor(0xFFD460)},
-       std::array<glm::vec3, 4>{hexToColor(0xFFD460), hexToColor(0xF07B3F), hexToColor(0xEA5455), hexToColor(0x2D4059)},
-       std::array<glm::vec3, 4>{hexToColor(0xD92027), hexToColor(0xFF9234), hexToColor(0xFFCD3C), hexToColor(0x35D0BA)},
-       std::array<glm::vec3, 4>{hexToColor(0x35D0BA), hexToColor(0xFFCD3C), hexToColor(0xFF9234), hexToColor(0xD92027)},
-       std::array<glm::vec3, 4>{hexToColor(0x071A52), hexToColor(0x086972), hexToColor(0x17B978), hexToColor(0xA7FF83)},
-       std::array<glm::vec3, 4>{hexToColor(0xA7FF83), hexToColor(0x17B978), hexToColor(0x086972), hexToColor(0x071A52)},
-       std::array<glm::vec3, 4>{hexToColor(0xF7FD04), hexToColor(0xF9B208), hexToColor(0xF98404), hexToColor(0xFC5404)},
-       std::array<glm::vec3, 4>{hexToColor(0xFC5404), hexToColor(0xF98404), hexToColor(0xF9B208), hexToColor(0xF7FD04)},
-       std::array<glm::vec3, 4>{hexToColor(0x00AD7C), hexToColor(0x52D681), hexToColor(0xB5FF7D), hexToColor(0xFFF8B5)},
-       std::array<glm::vec3, 4>{hexToColor(0xFFF8B5), hexToColor(0xB5FF7D), hexToColor(0x52D681), hexToColor(0x00AD7C)},
-       std::array<glm::vec3, 4>{hexToColor(0xF06868), hexToColor(0xFAB57A), hexToColor(0xEDF798), hexToColor(0x80D6FF)},
-       std::array<glm::vec3, 4>{hexToColor(0x80D6FF), hexToColor(0xEDF798), hexToColor(0xFAB57A), hexToColor(0xF06868)},
-       std::array<glm::vec3, 4>{hexToColor(0x0CECDD), hexToColor(0xFFF338), hexToColor(0xFF67E7), hexToColor(0xC400FF)},
-       std::array<glm::vec3, 4>{hexToColor(0xC400FF), hexToColor(0xFF67E7), hexToColor(0xFFF338), hexToColor(0x0CECDD)},
-       std::array<glm::vec3, 4>{hexToColor(0x0F0766), hexToColor(0x59057B), hexToColor(0xAB0E86), hexToColor(0xE01171)},
-       std::array<glm::vec3, 4>{hexToColor(0xE01171), hexToColor(0xAB0E86), hexToColor(0x59057B), hexToColor(0x0F0766)},
-       std::array<glm::vec3, 4>{hexToColor(0x00E0FF), hexToColor(0x74F9FF), hexToColor(0xA6FFF2), hexToColor(0xE8FFE8)},
-       std::array<glm::vec3, 4>{hexToColor(0xE8FFE8), hexToColor(0xA6FFF2), hexToColor(0x74F9FF), hexToColor(0x00E0FF)}};
-
-   loadCube();
-   composeGrowAnimation();
-   composeShrinkAnimation();
-}
-
-DecalRenderer::~DecalRenderer()
-{
-   glDeleteFramebuffers(1, &mDecalFBO);
-   glDeleteTextures(1, &mNormalTexture);
-   glDeleteTextures(1, &mDepthTexture);
-}
-
-void DecalRenderer::bindDecalFBO()
-{
-   glBindFramebuffer(GL_FRAMEBUFFER, mDecalFBO);
-}
-
-void DecalRenderer::unbindDecalFBO()
-{
-   glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void DecalRenderer::renderDecals(const glm::mat4 &viewMatrix, const glm::mat4 &perspectiveProjectionMatrix, bool displayDecalOBBs, bool displayDiscardedDecalParts)
@@ -122,22 +62,6 @@ void DecalRenderer::addDecal(const glm::vec3 &decalPosition, const glm::vec3 &de
    mDecalIndex = (mDecalIndex + 1) % 20;
 }
 
-void DecalRenderer::updateDecals(float playbackSpeed)
-{
-   updateGrowingDecals(playbackSpeed);
-   updateStableDecals();
-   updateShrinkingDecals(playbackSpeed);
-}
-
-void DecalRenderer::reset()
-{
-   mGrowingDecals.clear();
-   mStableDecals.clear();
-   mShrinkingDecals.clear();
-   mDecals.clear();
-   mDecalIndex = 0;
-}
-
 void DecalRenderer::setDecalScale(float scale)
 {
    ScalarFrame &frame1 = mGrowAnimation.GetFrame(1);
@@ -176,96 +100,6 @@ void DecalRenderer::loadCube()
       mCubeMeshes[i].ConfigureVAO(positionsAttribLoc,
                                   normalsAttribLoc,
                                   texCoordsAttribLoc);
-   }
-}
-
-void DecalRenderer::composeGrowAnimation()
-{
-   // Compose the grow animation
-   mGrowAnimation.SetInterpolation(Interpolation::Cubic);
-   mGrowAnimation.SetNumberOfFrames(2);
-
-   // Frame 0
-   ScalarFrame &frame0 = mGrowAnimation.GetFrame(0);
-   frame0.mTime = 0.0f;
-   frame0.mInSlope[0] = 0.0f;
-   frame0.mValue[0] = 0.0f;
-   frame0.mOutSlope[0] = 4.5f;
-
-   // Frame 1
-   ScalarFrame &frame1 = mGrowAnimation.GetFrame(1);
-   frame1.mTime = 1.0f;
-   frame1.mInSlope[0] = 0.0f;
-   frame1.mValue[0] = 1.0f;
-   frame1.mOutSlope[0] = 0.0f;
-}
-
-void DecalRenderer::composeShrinkAnimation()
-{
-   // Compose the shrink animation
-   mShrinkAnimation.SetInterpolation(Interpolation::Cubic);
-   mShrinkAnimation.SetNumberOfFrames(2);
-
-   // Frame 0
-   ScalarFrame &frame0 = mShrinkAnimation.GetFrame(0);
-   frame0.mTime = 0.0f;
-   frame0.mInSlope[0] = 0.0f;
-   frame0.mValue[0] = 1.0f;
-   frame0.mOutSlope[0] = 0.0f;
-
-   // Frame 1
-   ScalarFrame &frame1 = mShrinkAnimation.GetFrame(1);
-   frame1.mTime = 1.0f;
-   frame1.mInSlope[0] = 0.0f;
-   frame1.mValue[0] = 0.0f;
-   frame1.mOutSlope[0] = 0.0f;
-}
-
-void DecalRenderer::updateGrowingDecals(float playbackSpeed)
-{
-   unsigned int numDecalsDoneGrowing = 0;
-   for (const std::list<Decal>::iterator &growingDecalIter : mGrowingDecals)
-   {
-      if (growingDecalIter->grow(mGrowAnimation, playbackSpeed))
-      {
-         mStableDecals.push_back(growingDecalIter);
-         ++numDecalsDoneGrowing;
-      }
-   }
-
-   if (numDecalsDoneGrowing > 0)
-   {
-      mGrowingDecals.erase(mGrowingDecals.begin(), std::next(mGrowingDecals.begin(), numDecalsDoneGrowing));
-   }
-}
-
-void DecalRenderer::updateStableDecals()
-{
-   int numDecalsToStartShrinking = static_cast<int>(mStableDecals.size()) - mMaxNumDecals;
-
-   // Start erasing one dead decal per frame
-   if (numDecalsToStartShrinking > 0)
-   {
-      mShrinkingDecals.push_back(mStableDecals[0]);
-      mStableDecals.erase(mStableDecals.begin(), std::next(mStableDecals.begin(), 1));
-   }
-}
-
-void DecalRenderer::updateShrinkingDecals(float playbackSpeed)
-{
-   unsigned int numDecalsDoneShrinking = 0;
-   for (const std::list<Decal>::iterator &shrinkingDecalIter : mShrinkingDecals)
-   {
-      if (shrinkingDecalIter->shrink(mShrinkAnimation, playbackSpeed))
-      {
-         ++numDecalsDoneShrinking;
-      }
-   }
-
-   if (numDecalsDoneShrinking > 0)
-   {
-      mShrinkingDecals.erase(mShrinkingDecals.begin(), std::next(mShrinkingDecals.begin(), numDecalsDoneShrinking));
-      mDecals.erase(mDecals.begin(), std::next(mDecals.begin(), numDecalsDoneShrinking));
    }
 }
 
@@ -318,13 +152,4 @@ void DecalRenderer::renderStableDecals()
 
       mDecalTextures[decalIter->getDecalIndex()]->unbind(2);
    }
-}
-
-glm::vec3 DecalRenderer::hexToColor(int hex)
-{
-   float r = static_cast<float>(((hex >> 16) & 0xff)) / 255.0f;
-   float g = static_cast<float>(((hex >> 8) & 0xff)) / 255.0f;
-   float b = static_cast<float>((hex & 0xff)) / 255.0f;
-
-   return glm::vec3(r, g, b);
 }
